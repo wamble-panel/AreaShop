@@ -142,13 +142,13 @@ public class WorldEditHandler {
 
 			Clipboard clipboard = reader.read();
 			BlockVector3 dimensions = clipboard.getDimensions();
-			if(dimensions.getY() != regionInterface.getHeight()
-					|| dimensions.getX() != regionInterface.getWidth()
-					|| dimensions.getZ() != regionInterface.getDepth()) {
+			if(dimensions.y() != regionInterface.getHeight()
+					|| dimensions.x() != regionInterface.getWidth()
+					|| dimensions.z() != regionInterface.getDepth()) {
 				AreaShop.warn("Size of the region " + regionInterface.getName() + " is not the same as the schematic to restore!");
-				AreaShop.debug("schematic|region, x:" + dimensions.getX() + "|" + regionInterface.getWidth()
-						+ ", y:" + dimensions.getY() + "|" + regionInterface.getHeight()
-						+ ", z:" + dimensions.getZ() + "|" + regionInterface.getDepth());
+				AreaShop.debug("schematic|region, x:" + dimensions.x() + "|" + regionInterface.getWidth()
+						+ ", y:" + dimensions.y() + "|" + regionInterface.getHeight()
+						+ ", z:" + dimensions.z() + "|" + regionInterface.getDepth());
 			}
 			clipboard.setOrigin(clipboard.getMinimumPoint());
 			ClipboardHolder clipboardHolder = new ClipboardHolder(clipboard);

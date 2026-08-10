@@ -2,6 +2,7 @@ package me.wiefferink.areashop.commands;
 
 import me.wiefferink.areashop.AreaShop;
 import me.wiefferink.areashop.messages.Message;
+import me.wiefferink.areashop.tools.Utils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
