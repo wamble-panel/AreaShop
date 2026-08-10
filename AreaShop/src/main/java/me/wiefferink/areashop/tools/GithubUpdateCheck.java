@@ -1,18 +1,19 @@
 package me.wiefferink.areashop.tools;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -48,7 +49,7 @@ public class GithubUpdateCheck {
 		this.logger = plugin.getLogger();
 		this.author = author;
 		this.repository = repository;
-		this.currentVersion = plugin.getDescription().getVersion();
+		this.currentVersion = plugin.getPluginMeta().getVersion();
 		this.versionComparator = (latest, current) ->
 				!latest.equalsIgnoreCase(current);
 
@@ -89,9 +90,9 @@ public class GithubUpdateCheck {
 				try {
 					try {
 						String rawUrl = API_HOST + "/" + author + "/" + repository + "/" + API_LATEST_RELEASE;
-						url = new URL(rawUrl);
-					} catch(MalformedURLException e) {
-						logger.severe("Invalid url: '" + url + "', are the author '" + author + "' and repository '" + repository + "' correct?");
+						url = new URI(rawUrl).toURL();
+					} catch(URISyntaxException | IOException | IllegalArgumentException e) {
+						logger.severe("Invalid url, are the author '" + author + "' and repository '" + repository + "' correct?");
 						error = true;
 						return;
 					}
@@ -100,40 +101,49 @@ public class GithubUpdateCheck {
 						URLConnection conn = url.openConnection();
 						// Give up after 15 seconds
 						conn.setConnectTimeout(15000);
+						conn.setReadTimeout(15000);
 						// Identify ourselves
 						conn.addRequestProperty("User-Agent", USER_AGENT);
 						// Make sure we access the correct api version
 						conn.addRequestProperty("Accept", "application/vnd.github.v3+json");
-						// We want to read the result
-						conn.setDoOutput(true);
-						// Open connection
-						try(BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-							String response = reader.readLine();
-							debug("Response:", response);
 
-							JSONObject latestRelease = (JSONObject)JSONValue.parse(response);
-
-							if(latestRelease.isEmpty()) {
-								logger.warning("Failed to get api response from " + url);
-								error = true;
-								return;
+						// Read the whole response, the api does not promise to keep it on one line
+						StringBuilder response = new StringBuilder();
+						try(BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+							String line;
+							while((line = reader.readLine()) != null) {
+								response.append(line);
 							}
-							debug("json: " + latestRelease.toJSONString());
-
-							// Latest version
-							latestVersion = (String)latestRelease.get("tag_name");
-							debug("Tag name:", latestVersion);
-
-							// Current version
-							debug("Plugin version:", currentVersion);
-
-							// Compare version
-							hasUpdate = versionComparator.isNewer(latestVersion, currentVersion);
 						}
+						debug("Response:", response);
+
+						JsonElement parsed = JsonParser.parseString(response.toString());
+						if(!parsed.isJsonObject()) {
+							logger.warning("Failed to get api response from " + url);
+							error = true;
+							return;
+						}
+
+						JsonElement tagName = parsed.getAsJsonObject().get("tag_name");
+						if(tagName == null || !tagName.isJsonPrimitive()) {
+							logger.warning("The api response of " + url + " does not contain a release version");
+							error = true;
+							return;
+						}
+
+						// Latest version
+						latestVersion = tagName.getAsString();
+						debug("Tag name:", latestVersion);
+
+						// Current version
+						debug("Plugin version:", currentVersion);
+
+						// Compare version
+						hasUpdate = versionComparator.isNewer(latestVersion, currentVersion);
 					} catch(IOException e) {
-						logger.severe("Failed to get latest release:" + ExceptionUtils.getStackTrace(e));
+						logger.severe("Failed to get latest release:" + Utils.getStackTrace(e));
 						error = true;
-					} catch(ClassCastException e) {
+					} catch(JsonSyntaxException | IllegalStateException e) {
 						logger.info("Unexpected structure of the result, failed to parse it");
 						error = true;
 					}
@@ -231,13 +241,13 @@ public class GithubUpdateCheck {
 	 */
 	private void debug(Object... message) {
 		if(DEBUG) {
-			logger.info("[" + this.getClass().getSimpleName() + "] [DEBUG] " + StringUtils.join(message, " "));
+			logger.info("[" + this.getClass().getSimpleName() + "] [DEBUG] " + Utils.join(message, " "));
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "GithubUpdateCheck(" + StringUtils.join(Arrays.asList(
+		return "GithubUpdateCheck(" + Utils.join(Arrays.asList(
 				"author=" + author,
 				"repository=" + repository,
 				"plugin=" + plugin.getName(),

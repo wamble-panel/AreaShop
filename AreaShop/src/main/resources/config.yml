@@ -6,6 +6,16 @@
 # ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 # │ GENERAL: Options that influence the global state of the plugin                                                             │
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+# ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+# │ COLORS: How to color anything AreaShop prints, in this file, default.yml and the language files.                           │
+# └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+# There are three ways to color text, they can be mixed freely:
+#   1. Classic codes:  '&a' for green, '&l' for bold, '&r' to reset. See https://minecraft.wiki/w/Formatting_codes.
+#   2. Hex colors:     '&#FF00AA' for any color you like, '&#F0A' is short for '&#FF00AA'.
+#   3. Named tags:     '[gold]', '[bold]...[/bold]', '[reset]', '[break]' for a new line, and '[#FF00AA]' for a hex color.
+# Hex colors work everywhere: chat messages, signs, the chat prefix and the language files.
+# A '&' that is not followed by a valid code is printed as written, so 'Tom & Jerry' stays readable.
+
 # Chat prefix used for all messages in the chat, also changes the greeting messages.
 chatPrefix:
   - '[darkgreen][AreaShop][reset]'
@@ -103,7 +113,7 @@ blacklist:
 stackRegionNumberLength: 3
 # Allow/disallow adding players that did not visit the server yet as friend of a region.
 addFriendNotExistingPlayers: false
-# Enable sending stats to http://mcstats.org/ (Metrics plugin).
+# Enable sending stats to https://bstats.org.
 # This information will give me an indication about how much the plugin is used and encourages me to continue development.
 sendStats: true
 # If enabled it will check for updates when loading the plugin, it will never download files, it will only notify about it.

@@ -45,6 +45,8 @@ adding:
 # ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 # │ OTHER: All other settings.                                                                                                 │
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+# Service id of AreaShop on https://bstats.org, only change this when you run a fork with its own statistics page.
+bstatsId: 3204
 # Allow or disallow extending a rental region when the player is above his limits enforced by the 'limitGroups' section below.
 # false will ensure a player will eventually lose his region when he has no access anymore.
 allowRegionExtendsWhenAboveLimits: false

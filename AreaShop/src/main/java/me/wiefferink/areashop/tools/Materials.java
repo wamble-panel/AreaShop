@@ -1,132 +1,85 @@
 package me.wiefferink.areashop.tools;
 
-import me.wiefferink.areashop.AreaShop;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-public class Materials {
+/**
+ * Helpers around sign materials.
+ *
+ * <p>Which materials count as a sign comes from the vanilla block tags, so every wood type that
+ * Minecraft adds is picked up without a plugin update.
+ */
+public final class Materials {
+
+	/**
+	 * Material names used by AreaShop before 1.14, mapped to what they are called now.
+	 * Regions saved by an older version of AreaShop still have these written in their config.
+	 */
+	private static final Map<String, String> LEGACY_NAMES = Map.of(
+			"SIGN", "OAK_SIGN",
+			"SIGN_POST", "OAK_SIGN",
+			"LEGACY_SIGN", "OAK_SIGN",
+			"LEGACY_SIGN_POST", "OAK_SIGN",
+			"WALL_SIGN", "OAK_WALL_SIGN",
+			"LEGACY_WALL_SIGN", "OAK_WALL_SIGN"
+	);
 
 	private Materials() {
-
-	}
-
-	private static final HashSet<String> WALL_SIGN_TYPES = new HashSet<>(Arrays.asList(
-		// 1.14+ types
-		"ACACIA_WALL_SIGN",
-		"BIRCH_WALL_SIGN",
-		"DARK_OAK_WALL_SIGN",
-		"JUNGLE_WALL_SIGN",
-		"OAK_WALL_SIGN",
-		"SPRUCE_WALL_SIGN",
-
-		// Legacy types
-		"LEGACY_WALL_SIGN",
-		"WALL_SIGN"
-	));
-	private static final HashSet<String> FLOOR_SIGN_TYPES = new HashSet<>(Arrays.asList(
-		// 1.14+ types
-		"ACACIA_SIGN",
-		"BIRCH_SIGN",
-		"DARK_OAK_SIGN",
-		"JUNGLE_SIGN",
-		"OAK_SIGN",
-		"SPRUCE_SIGN",
-
-		// Legacy types
-		"LEGACY_SIGN",
-		"LEGACY_SIGN_POST",
-		"SIGN",
-		"SIGN_POST"
-	));
-
-	private static boolean legacyMaterials = false;
-
-	static {
-		List<String> legacyMaterialVersions = Arrays.asList("1.7", "1.8", "1.9", "1.10", "1.11", "1.12");
-		for(String legacyMaterialVersion : legacyMaterialVersions) {
-			String version = Bukkit.getBukkitVersion();
-			// Detects '1.8', '1.8.3', '1.8-pre1' style versions
-			if(version.equals(legacyMaterialVersion)
-					|| version.startsWith(legacyMaterialVersion + ".")
-					|| version.startsWith(legacyMaterialVersion + "-")) {
-				legacyMaterials = true;
-				break;
-			}
-		}
 	}
 
 	/**
-	 * Get material based on a sign material name.
-	 * @param name Name of the sign material
-	 * @return null if not a sign, otherwise the material matching the name (when the material is not available on the current minecraft version, it returns the base type)
+	 * Get the material belonging to a sign material name.
+	 * @param name Name of the sign material, as written in the region config
+	 * @return The material, or null when the name is not a sign
 	 */
 	public static Material signNameToMaterial(String name) {
-		// Expected null case
-		if (!isSign(name)) {
+		if(name == null || name.isBlank()) {
 			return null;
 		}
 
-		Material result = null;
-		if (legacyMaterials) {
-			// 1.12 and lower just know SIGN_POST, WALL_SIGN and SIGN
-			if (FLOOR_SIGN_TYPES.contains(name)) {
-				result = Material.getMaterial("SIGN_POST");
-			} else if (WALL_SIGN_TYPES.contains(name)) {
-				result = Material.getMaterial("WALL_SIGN");
-				if (result == null) {
-					result = Material.getMaterial("SIGN");
-				}
-			}
-		} else {
-			// Try saved name (works for wood types on 1.14, regular types for below)
-			result = Material.getMaterial(name);
-			if (result == null) {
-				// Cases for 1.13, which don't know wood types, but need new materials
-				if (FLOOR_SIGN_TYPES.contains(name)) {
-					// SIGN -> OAK_SIGN for 1.14
-					result = Material.getMaterial("OAK_SIGN");
-					// Fallback for 1.13
-					if (result == null) {
-						result = Material.getMaterial("SIGN");
-					}
-				} else if (WALL_SIGN_TYPES.contains(name)) {
-					// WALL_SIGN -> OAK_WALL_SIGN for 1.14
-					result = Material.getMaterial("OAK_WALL_SIGN");
-					// Fallback for 1.13
-					if (result == null) {
-						result = Material.getMaterial("WALL_SIGN");
-					}
-				}
-			}
+		String cleaned = name.trim().toUpperCase(Locale.ROOT);
+		if(cleaned.startsWith("MINECRAFT:")) {
+			cleaned = cleaned.substring("MINECRAFT:".length());
 		}
+		cleaned = LEGACY_NAMES.getOrDefault(cleaned, cleaned);
 
-		if (result == null) {
-			AreaShop.debug("Materials.get() null result:", name, "legacyMaterials:", legacyMaterials);
+		Material result = Material.getMaterial(cleaned);
+		if(result == null || !isSign(result)) {
+			return null;
 		}
-
 		return result;
 	}
 
 	/**
-	 * Check if a Material is a sign (of either the wall or floor type).
+	 * Check if a material is a sign, of any wood type and of any of the standing, wall
+	 * and hanging variants.
 	 * @param material Material to check
 	 * @return true if the given material is a sign
 	 */
 	public static boolean isSign(Material material) {
-		return isSign(material.name());
+		return material != null
+				&& (Tag.ALL_SIGNS.isTagged(material) || Tag.ALL_HANGING_SIGNS.isTagged(material));
 	}
 
 	/**
-	 * Check if a Material is a sign (of either the wall or floor type).
-	 * @param name String to check
-	 * @return true if the given material is a sign
+	 * Check if a material name refers to a sign.
+	 * @param name Name to check
+	 * @return true if the given name is that of a sign
 	 */
 	public static boolean isSign(String name) {
-		return name != null && (FLOOR_SIGN_TYPES.contains(name) || WALL_SIGN_TYPES.contains(name));
+		return signNameToMaterial(name) != null;
 	}
 
+	/**
+	 * Check if a material is a sign that hangs on a wall, which needs a block behind it.
+	 * @param material Material to check
+	 * @return true if the given material is a wall sign
+	 */
+	public static boolean isWallSign(Material material) {
+		return material != null
+				&& (Tag.WALL_SIGNS.isTagged(material) || Tag.WALL_HANGING_SIGNS.isTagged(material));
+	}
 }

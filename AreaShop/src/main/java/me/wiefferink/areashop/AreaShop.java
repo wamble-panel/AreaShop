@@ -3,10 +3,9 @@ package me.wiefferink.areashop;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.managers.RegionManager;
-import me.wiefferink.areashop.interfaces.AreaShopInterface;
-import me.wiefferink.areashop.interfaces.BukkitInterface;
-import me.wiefferink.areashop.interfaces.WorldEditInterface;
-import me.wiefferink.areashop.interfaces.WorldGuardInterface;
+import me.wiefferink.areashop.handlers.BukkitHandler;
+import me.wiefferink.areashop.handlers.WorldEditHandler;
+import me.wiefferink.areashop.handlers.WorldGuardHandler;
 import me.wiefferink.areashop.listeners.PlayerLoginLogoutListener;
 import me.wiefferink.areashop.managers.CommandManager;
 import me.wiefferink.areashop.managers.FeatureManager;
@@ -16,12 +15,11 @@ import me.wiefferink.areashop.managers.SignLinkerManager;
 import me.wiefferink.areashop.tools.Analytics;
 import me.wiefferink.areashop.tools.GithubUpdateCheck;
 import me.wiefferink.areashop.tools.Utils;
-import me.wiefferink.bukkitdo.Do;
-import me.wiefferink.interactivemessenger.processing.Message;
-import me.wiefferink.interactivemessenger.source.LanguageManager;
+import me.wiefferink.areashop.tools.Do;
+import me.wiefferink.areashop.messages.Message;
+import me.wiefferink.areashop.messages.LanguageManager;
+import me.wiefferink.areashop.messages.Log;
 import net.milkbowl.vault.economy.Economy;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -35,27 +33,24 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Main class for the AreaShop plugin.
  * Contains methods to get parts of the plugins functionality and definitions for constants.
  */
-public final class AreaShop extends JavaPlugin implements AreaShopInterface {
+public final class AreaShop extends JavaPlugin {
 	// Statically available instance
 	private static AreaShop instance = null;
 
 	// General variables
 	private WorldGuardPlugin worldGuard = null;
-	private WorldGuardInterface worldGuardInterface = null;
+	private WorldGuardHandler worldGuardHandler = null;
 	private WorldEditPlugin worldEdit = null;
-	private WorldEditInterface worldEditInterface = null;
-	private BukkitInterface bukkitInterface = null;
+	private WorldEditHandler worldEditHandler = null;
+	private BukkitHandler bukkitHandler = null;
 	private FileManager fileManager = null;
 	private LanguageManager languageManager = null;
 	private CommandManager commandManager = null;
@@ -148,195 +143,31 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	public void onEnable() {
 		AreaShop.instance = this;
 		Do.init(this);
+		Log.setLogger(getLogger());
 		managers = new HashSet<>();
 		boolean error = false;
 
-		// Find WorldEdit integration version to load
-		String weVersion = null;
-		String rawWeVersion = null;
-		String weBeta = null;
+		// WorldEdit is needed for schematics and selections
 		Plugin plugin = getServer().getPluginManager().getPlugin("WorldEdit");
 		if(!(plugin instanceof WorldEditPlugin) || !plugin.isEnabled()) {
 			error("WorldEdit plugin is not present or has not loaded correctly");
 			error = true;
 		} else {
 			worldEdit = (WorldEditPlugin)plugin;
-			rawWeVersion = worldEdit.getDescription().getVersion();
-
-			// Find beta version
-			Pattern pattern = Pattern.compile("beta-?\\d+");
-			Matcher matcher = pattern.matcher(rawWeVersion);
-			if (matcher.find()) {
-				weBeta = matcher.group();
-			}
-
-			// Get correct WorldEditInterface (handles things that changed version to version)
-			if(worldEdit.getDescription().getVersion().startsWith("5.")) {
-				weVersion = "5";
-			} else if(worldEdit.getDescription().getVersion().startsWith("6.")) {
-				weVersion = "6";
-			} else if ("beta-01".equalsIgnoreCase(weBeta)) {
-				weVersion = "7_beta_1";
-			} else {
-				// beta-02 and beta-03 also have the new vector system already
-				weVersion = "7_beta_4";
-			}
-
-			weVersion = "WorldEditHandler" + weVersion;
+			worldEditHandler = new WorldEditHandler(this);
 		}
 
-		// Find WorldGuard integration version to load
-		String wgVersion = null;
-		String rawWgVersion = null;
-		int major = 0;
-		int minor = 0;
-		int fixes = 0;
-		Integer build = null;
+		// WorldGuard owns the regions AreaShop rents and sells
 		plugin = getServer().getPluginManager().getPlugin("WorldGuard");
 		if(!(plugin instanceof WorldGuardPlugin) || !plugin.isEnabled()) {
 			error("WorldGuard plugin is not present or has not loaded correctly");
 			error = true;
 		} else {
 			worldGuard = (WorldGuardPlugin)plugin;
-			// Get correct WorldGuardInterface (handles things that changed version to version)
-			try {
-				rawWgVersion = worldGuard.getDescription().getVersion();
-				if(rawWgVersion.contains("-SNAPSHOT;")) {
-					String buildNumber = rawWgVersion.substring(rawWgVersion.indexOf("-SNAPSHOT;") + 10);
-					if(buildNumber.contains("-")) {
-						buildNumber = buildNumber.substring(0, buildNumber.indexOf('-'));
-						if (Utils.isNumeric(buildNumber)) {
-							build = Integer.parseInt(buildNumber);
-						} else {
-							warn("Could not correctly parse the build of WorldGuard, raw version: " + rawWgVersion + ", buildNumber: " + buildNumber);
-						}
-					}
-				}
-				// Clear stuff from the version string that is not a number
-				String[] versionParts = rawWgVersion.split("\\.");
-				for(int i = 0; i < versionParts.length; i++) {
-					Pattern pattern = Pattern.compile("^\\d+");
-					Matcher matcher = pattern.matcher(versionParts[i]);
-					if(matcher.find()) {
-						versionParts[i] = matcher.group();
-					}
-				}
-				// Find major, minor and fix numbers
-				try {
-					if(versionParts.length > 0) {
-						major = Integer.parseInt(versionParts[0]);
-					}
-					if(versionParts.length > 1) {
-						minor = Integer.parseInt(versionParts[1]);
-					}
-					if(versionParts.length > 2) {
-						fixes = Integer.parseInt(versionParts[2]);
-					}
-				} catch(NumberFormatException e) {
-					warn("Something went wrong while parsing WorldGuard version number: " + rawWgVersion);
-				}
-
-				// Determine correct implementation to use
-				if(rawWgVersion.startsWith("5.")) {
-					wgVersion = "5";
-				} else if(major == 6 && minor == 1 && fixes < 3) {
-					wgVersion = "6";
-				} else if(major == 6) {
-					if(build != null && build == 1672) {
-						error = true;
-						error("Build 1672 of WorldGuard is broken, update to a later build or a stable version!");
-					} else if(build != null && build < 1672) {
-						wgVersion = "6";
-					} else {
-						wgVersion = "6_1_3";
-					}
-				} else if ("beta-01".equalsIgnoreCase(weBeta)) {
-					// When using WorldEdit beta-01, we need to use the WorldGuard variant with the old vector system
-					wgVersion = "7_beta_1";
-				} else {
-					// Even though the WorldGuard file is called beta-02, the reported version is still beta-01!
-					wgVersion = "7_beta_2";
-				}
-			} catch(Exception e) { // If version detection fails, at least try to load the latest version
-				warn("Parsing the WorldGuard version failed, assuming version 7_beta_2:", rawWgVersion);
-				wgVersion = "7_beta_2";
-			}
-
-			wgVersion = "WorldGuardHandler" + wgVersion;
+			worldGuardHandler = new WorldGuardHandler();
 		}
 
-		// Check if FastAsyncWorldEdit is installed
-		boolean fawe;
-		try {
-			Class.forName("com.boydti.fawe.Fawe" );
-			fawe = true;
-		} catch (ClassNotFoundException ignore) {
-			fawe = false;
-		}
-
-		if (fawe) {
-			boolean useNewIntegration = true;
-			List<String> standardIntegrationVersions = Arrays.asList("1.7", "1.8", "1.9", "1.10", "1.11", "1.12");
-			for(String standardIntegrationVersion : standardIntegrationVersions) {
-				String version = Bukkit.getBukkitVersion();
-				// Detects '1.8', '1.8.3', '1.8-pre1' style versions
-				if(version.equals(standardIntegrationVersion)
-						|| version.startsWith(standardIntegrationVersion + ".")
-						|| version.startsWith(standardIntegrationVersion + "-")) {
-					useNewIntegration = false;
-					break;
-				}
-			}
-
-			if (useNewIntegration) {
-				weVersion = "FastAsyncWorldEditHandler";
-				wgVersion = "FastAsyncWorldEditWorldGuardHandler";
-			}
-		}
-
-		// Load WorldEdit
-		try {
-			Class<?> clazz = Class.forName("me.wiefferink.areashop.handlers." + weVersion);
-			// Check if we have a NMSHandler class at that location.
-			if(WorldEditInterface.class.isAssignableFrom(clazz)) { // Make sure it actually implements WorldEditInterface
-				worldEditInterface = (WorldEditInterface)clazz.getConstructor(AreaShopInterface.class).newInstance(this); // Set our handler
-			}
-		} catch(Exception e) {
-			error("Could not load the handler for WorldEdit (tried to load " + weVersion + "), report this problem to the author: " + ExceptionUtils.getStackTrace(e));
-			error = true;
-			weVersion = null;
-		}
-
-		// Load WorldGuard
-		try {
-			Class<?> clazz = Class.forName("me.wiefferink.areashop.handlers." + wgVersion);
-			// Check if we have a NMSHandler class at that location.
-			if(WorldGuardInterface.class.isAssignableFrom(clazz)) { // Make sure it actually implements WorldGuardInterface
-				worldGuardInterface = (WorldGuardInterface)clazz.getConstructor(AreaShopInterface.class).newInstance(this); // Set our handler
-			}
-		} catch(Exception e) {
-			error("Could not load the handler for WorldGuard (tried to load " + wgVersion + "), report this problem to the author:" + ExceptionUtils.getStackTrace(e));
-			error = true;
-			wgVersion = null;
-		}
-
-		// Load Bukkit implementation
-		String bukkitHandler;
-		try {
-			Class.forName("org.bukkit.block.data.type.WallSign");
-			bukkitHandler = "1_13";
-		} catch (ClassNotFoundException e) {
-			bukkitHandler = "1_12";
-		}
-
-		try {
-			Class<?> clazz = Class.forName("me.wiefferink.areashop.handlers.BukkitHandler" + bukkitHandler);
-			bukkitInterface = (BukkitInterface)clazz.getConstructor(AreaShopInterface.class).newInstance(this);
-		} catch (Exception e) {
-			error("Could not load the Bukkit handler (used for sign updates), tried to load:", bukkitHandler + ", report this problem to the author:", ExceptionUtils.getStackTrace(e));
-			error = true;
-			bukkitHandler = null;
-		}
+		bukkitHandler = new BukkitHandler();
 
 		// Check if Vault is present
 		if(getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -350,15 +181,12 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 		boolean loadFilesResult = fileManager.loadFiles(false);
 		error = error || !loadFilesResult;
 
-		// Print loaded version of WG and WE in debug
-		if(wgVersion != null) {
-			AreaShop.debug("Loaded ", wgVersion, "(raw version:" + rawWgVersion + ", major:" + major + ", minor:" + minor + ", fixes:" + fixes + ", build:" + build + ", fawe:" + fawe + ")");
+		// Print the versions AreaShop is working with in debug
+		if(worldGuard != null) {
+			AreaShop.debug("Using WorldGuard", worldGuard.getPluginMeta().getVersion());
 		}
-		if(weVersion != null) {
-			AreaShop.debug("Loaded ", weVersion, "(raw version:" + rawWeVersion + ", beta:" + weBeta + ")");
-		}
-		if(bukkitHandler != null) {
-			AreaShop.debug("Loaded BukkitHandler", bukkitHandler);
+		if(worldEdit != null) {
+			AreaShop.debug("Using WorldEdit", worldEdit.getPluginMeta().getVersion());
 		}
 
 		setupLanguageManager();
@@ -465,9 +293,9 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 
 		// Cleanup plugins
 		worldGuard = null;
-		worldGuardInterface = null;
+		worldGuardHandler = null;
 		worldEdit = null;
-		worldEditInterface = null;
+		worldEditHandler = null;
 
 		// Cleanup other stuff
 		chatprefix = null;
@@ -505,6 +333,8 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	 * Setup a new LanguageManager.
 	 */
 	private void setupLanguageManager() {
+		Message.setFancyMessages(getConfig().getBoolean("useFancyMessages"));
+		Message.setColorsInConsole(getConfig().getBoolean("useColorsInConsole"));
 		languageManager = new LanguageManager(
 				this,
 				languageFolder,
@@ -526,17 +356,16 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	 * Function to get the WorldGuard plugin.
 	 * @return WorldGuardPlugin
 	 */
-	@Override
 	public WorldGuardPlugin getWorldGuard() {
 		return worldGuard;
 	}
 
 	/**
-	 * Function to get WorldGuardInterface for version dependent things.
-	 * @return WorldGuardInterface
+	 * Function to get the WorldGuard handler.
+	 * @return The WorldGuard handler
 	 */
-	public WorldGuardInterface getWorldGuardHandler() {
-		return this.worldGuardInterface;
+	public WorldGuardHandler getWorldGuardHandler() {
+		return this.worldGuardHandler;
 	}
 
 	/**
@@ -545,24 +374,23 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	 * @return RegionManager for the given world, if there is one, otherwise null
 	 */
 	public RegionManager getRegionManager(World world) {
-		return this.worldGuardInterface.getRegionManager(world);
+		return this.worldGuardHandler.getRegionManager(world);
 	}
 
 	/**
 	 * Function to get the WorldEdit plugin.
 	 * @return WorldEditPlugin
 	 */
-	@Override
 	public WorldEditPlugin getWorldEdit() {
 		return worldEdit;
 	}
 
 	/**
-	 * Function to get WorldGuardInterface for version dependent things.
-	 * @return WorldGuardInterface
+	 * Function to get the WorldEdit handler.
+	 * @return The WorldEdit handler
 	 */
-	public WorldEditInterface getWorldEditHandler() {
-		return this.worldEditInterface;
+	public WorldEditHandler getWorldEditHandler() {
+		return this.worldEditHandler;
 	}
 
 	/**
@@ -577,8 +405,8 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	 * Get the BukkitHandler, for sign interactions.
 	 * @return BukkitHandler
 	 */
-	public BukkitInterface getBukkitHandler() {
-		return this.bukkitInterface;
+	public BukkitHandler getBukkitHandler() {
+		return this.bukkitHandler;
 	}
 
 	/**
@@ -673,16 +501,17 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 			return;
 		}
 		for(String group : section.getKeys(false)) {
-			if(!"default".equals(group)) {
-				Permission perm = new Permission("areashop.limits." + group);
-				try {
-					Bukkit.getPluginManager().addPermission(perm);
-				} catch(IllegalArgumentException e) {
-					warn("Could not add the following permission to be used as limit: " + perm.getName());
-				}
+			if("default".equals(group)) {
+				continue;
+			}
+			Permission permission = new Permission("areashop.limits." + group);
+			try {
+				Bukkit.getPluginManager().addPermission(permission);
+				Bukkit.getPluginManager().recalculatePermissionDefaults(permission);
+			} catch(IllegalArgumentException e) {
+				warn("Could not add the following permission to be used as limit: " + permission.getName());
 			}
 		}
-		Bukkit.getPluginManager().recalculatePermissionDefaults(Bukkit.getPluginManager().getPermission("playerwarps.limits"));
 	}
 
 	/**
@@ -799,17 +628,8 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	 */
 	public static void debug(Object... message) {
 		if(AreaShop.getInstance().debug) {
-			info("Debug: " + StringUtils.join(message, " "));
+			info("Debug: " + Utils.join(message, " "));
 		}
-	}
-
-	/**
-	 * Non-static debug to use as implementation of the interface.
-	 * @param message Object parts of the message that should be logged, toString() will be used
-	 */
-	@Override
-	public void debugI(Object... message) {
-		AreaShop.debug(StringUtils.join(message, " "));
 	}
 
 	/**
@@ -817,7 +637,7 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	 * @param message The message to print
 	 */
 	public static void info(Object... message) {
-		AreaShop.getInstance().getLogger().info(StringUtils.join(message, " "));
+		AreaShop.getInstance().getLogger().info(Utils.join(message, " "));
 	}
 
 	/**
@@ -825,7 +645,7 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	 * @param message The message to print
 	 */
 	public static void warn(Object... message) {
-		AreaShop.getInstance().getLogger().warning(StringUtils.join(message, " "));
+		AreaShop.getInstance().getLogger().warning(Utils.join(message, " "));
 	}
 
 	/**
@@ -833,7 +653,7 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	 * @param message The message to print
 	 */
 	public static void error(Object... message) {
-		AreaShop.getInstance().getLogger().severe(StringUtils.join(message, " "));
+		AreaShop.getInstance().getLogger().severe(Utils.join(message, " "));
 	}
 
 	/**
@@ -842,7 +662,7 @@ public final class AreaShop extends JavaPlugin implements AreaShopInterface {
 	 */
 	public static void debugTask(Object... message) {
 		if(AreaShop.getInstance().getConfig().getBoolean("debugTask")) {
-			AreaShop.debug(StringUtils.join(message, " "));
+			AreaShop.debug(Utils.join(message, " "));
 		}
 	}
 

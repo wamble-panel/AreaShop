@@ -21,47 +21,36 @@
     <system>GitHub Issues</system>
   </issueManagement>
 
-  <ciManagement>
-    <system>Jenkins</system>
-    <url>http://jenkins.wiefferink.me/job/AreaShop</url>
-  </ciManagement>
-
   <repositories>
     <repository>
-      <id>vault-repo</id>
-      <url>http://nexus.hc.to/content/repositories/pub_releases</url>
+      <id>papermc</id>
+      <url>https://repo.papermc.io/repository/maven-public/</url>
     </repository>
     <repository>
-      <id>wiefferink-repo</id>
-      <url>http://maven.wiefferink.me</url>
+      <id>enginehub</id>
+      <url>https://maven.enginehub.org/repo/</url>
     </repository>
     <repository>
-      <id>bstats-repo</id>
-      <url>http://repo.bstats.org/content/repositories/releases/</url>
+      <id>jitpack</id>
+      <url>https://jitpack.io</url>
     </repository>
   </repositories>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.release>25</maven.compiler.release>
     <build.number>#CUSTOM</build.number>
+
+    <!-- Server and plugin API versions AreaShop is built against -->
+    <paper.version>26.2.build.111-stable</paper.version>
+    <worldedit.version>7.4.4</worldedit.version>
+    <worldguard.version>7.0.17</worldguard.version>
+    <vault.version>1.7.1</vault.version>
+    <bstats.version>3.2.1</bstats.version>
+    <junit.version>5.11.4</junit.version>
   </properties>
 
   <modules>
-    <module>areashop-interface</module>
-    <module>areashop-bukkit-1_12</module>
-    <module>areashop-bukkit-1_13</module>
-    <module>areashop-worldguard-5</module>
-    <module>areashop-worldguard-6</module>
-    <module>areashop-worldguard-6_1_3</module>
-    <module>areashop-worldguard-7_beta_1</module>
-    <module>areashop-worldguard-7_beta_2</module>
-    <module>areashop-worldedit-5</module>
-    <module>areashop-worldedit-6</module>
-    <module>areashop-worldedit-7_beta_1</module>
-    <module>areashop-worldedit-7_beta_4</module>
-    <module>areashop-fastasyncworldedit</module>
     <module>AreaShop</module>
   </modules>
 
@@ -70,12 +59,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.6.0</version>
         <dependencies>
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>8.29</version>
+            <version>10.21.1</version>
           </dependency>
         </dependencies>
         <executions>
@@ -99,5 +88,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>

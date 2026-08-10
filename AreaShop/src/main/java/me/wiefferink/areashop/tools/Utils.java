@@ -7,13 +7,12 @@ import me.wiefferink.areashop.interfaces.WorldEditSelection;
 import me.wiefferink.areashop.regions.BuyRegion;
 import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.regions.RentRegion;
-import me.wiefferink.interactivemessenger.Log;
-import me.wiefferink.interactivemessenger.processing.Message;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import me.wiefferink.areashop.messages.Colors;
+import me.wiefferink.areashop.messages.Log;
+import me.wiefferink.areashop.messages.Message;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Server;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.Configuration;
@@ -22,10 +21,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import java.lang.reflect.Method;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -54,7 +51,6 @@ public class Utils {
 	private static Set<String> weeks;
 	private static Set<String> months;
 	private static Set<String> years;
-	private static ScriptEngine scriptEngine;
 	private static Map<Double, String> suffixes;
 
 	/**
@@ -152,22 +148,73 @@ public class Utils {
 
 	/**
 	 * Gets the online players.
-	 * Provides backwards compatibility for 1.7- where it returns an array
 	 * @return Online players
 	 */
-	@SuppressWarnings("unchecked")
 	public static Collection<? extends Player> getOnlinePlayers() {
-		try {
-			Method onlinePlayerMethod = Server.class.getMethod("getOnlinePlayers");
-			if(onlinePlayerMethod.getReturnType().equals(Collection.class)) {
-				return ((Collection<? extends Player>)onlinePlayerMethod.invoke(Bukkit.getServer()));
-			} else {
-				return Arrays.asList((Player[])onlinePlayerMethod.invoke(Bukkit.getServer()));
-			}
-		} catch(Exception ex) {
-			AreaShop.debug("getOnlinePlayers error: " + ex.getMessage());
+		return Bukkit.getOnlinePlayers();
+	}
+
+	/**
+	 * Turn a throwable into a string, to write it to the log.
+	 * @param throwable The throwable to print, may be null
+	 * @return The stacktrace of the throwable
+	 */
+	public static String getStackTrace(Throwable throwable) {
+		if(throwable == null) {
+			return "";
 		}
-		return new HashSet<>();
+		StringWriter result = new StringWriter();
+		throwable.printStackTrace(new PrintWriter(result, true));
+		return result.toString();
+	}
+
+	/**
+	 * Glue objects together with something in between.
+	 * @param parts     The objects to glue together, null values are printed as 'null'
+	 * @param separator The string to put between the parts
+	 * @return The parts glued together
+	 */
+	public static String join(Object[] parts, String separator) {
+		return parts == null ? "" : join(Arrays.asList(parts), separator);
+	}
+
+	/**
+	 * Glue part of an array together with something in between.
+	 * @param parts     The objects to glue together, null values are printed as 'null'
+	 * @param separator The string to put between the parts
+	 * @param start     Index to start at, inclusive
+	 * @param end       Index to stop at, exclusive
+	 * @return The selected parts glued together
+	 */
+	public static String join(Object[] parts, String separator, int start, int end) {
+		if(parts == null) {
+			return "";
+		}
+		int from = Math.max(0, start);
+		int to = Math.min(parts.length, end);
+		return from >= to ? "" : join(Arrays.asList(parts).subList(from, to), separator);
+	}
+
+	/**
+	 * Glue objects together with something in between.
+	 * @param parts     The objects to glue together, null values are printed as 'null'
+	 * @param separator The string to put between the parts
+	 * @return The parts glued together
+	 */
+	public static String join(Iterable<?> parts, String separator) {
+		if(parts == null) {
+			return "";
+		}
+		StringBuilder result = new StringBuilder();
+		boolean first = true;
+		for(Object part : parts) {
+			if(!first) {
+				result.append(separator);
+			}
+			first = false;
+			result.append(part);
+		}
+		return result.toString();
 	}
 
 	/**
@@ -494,16 +541,15 @@ public class Utils {
 
 
 	/**
-	 * Convert color and formatting codes to bukkit values.
+	 * Convert color and formatting codes to the format the client understands.
+	 *
+	 * <p>Handles the classic {@code &a} codes as well as {@code &#FF00AA} hex colors.
+	 *
 	 * @param input Start string with color and formatting codes in it
-	 * @return String with the color and formatting codes in the bukkit format
+	 * @return String with the color and formatting codes translated
 	 */
 	public static String applyColors(String input) {
-		String result = null;
-		if(input != null) {
-			result = ChatColor.translateAlternateColorCodes('&', input);
-		}
-		return result;
+		return Colors.translate(input);
 	}
 
 
@@ -739,42 +785,29 @@ public class Utils {
 		}
 	}
 
+	/** Used when a price expression cannot be evaluated, high enough that nobody buys by accident. */
+	private static final double PRICE_FALLBACK = 99999999999.0;
+
 	/**
 	 * Evaluate string input to a number.
-	 * Uses JavaScript for expressions.
-	 * @param input  The input string
+	 * @param input  The input string, a plain number or a math expression like {@code %volume% * 0.5}
 	 * @param region The region to apply replacements for and use for logging
-	 * @return double evaluated from the input or a very high default in case of a script exception
+	 * @return double evaluated from the input, or a very high default when the input is not valid
 	 */
 	public static double evaluateToDouble(String input, GeneralRegion region) {
 		// Replace variables
-		input = Message.fromString(input).replacements(region).getSingle();
+		String expression = Message.fromString(input).replacements(region).getPlain();
 
 		// Check for simple number
-		if(isDouble(input)) {
-			return Double.parseDouble(input);
+		if(isDouble(expression)) {
+			return Double.parseDouble(expression);
 		}
 
-		// Lazy init scriptEngine
-		if(scriptEngine == null) {
-			scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
-		}
-
-		// Evaluate expression
-		Object result;
 		try {
-			result = scriptEngine.eval(input);
-		} catch(ScriptException e) {
-			AreaShop.warn("Price of region", region.getName(), "is set with an invalid expression: '" + input + "', exception:", ExceptionUtils.getStackTrace(e));
-			return 99999999999.0; // High fallback for safety
-		}
-
-		// Handle the result
-		if(Utils.isDouble(result.toString())) {
-			return Double.parseDouble(result.toString());
-		} else {
-			AreaShop.warn("Price of region", region.getName(), "is set with the expression '" + input + "' that returns a result that is not a number:", result);
-			return 99999999999.0; // High fallback for safety
+			return Expression.evaluate(expression);
+		} catch(Expression.ExpressionException e) {
+			AreaShop.warn("Price of region", region.getName(), "is set with an invalid expression: '" + expression + "',", e.getMessage());
+			return PRICE_FALLBACK;
 		}
 	}
 
@@ -816,18 +849,35 @@ public class Utils {
 	}
 
 	/**
+	 * Find a player by name, without inventing one that never played here.
+	 *
+	 * <p>{@link Bukkit#getOfflinePlayer(String)} hands back a player object for any name at all,
+	 * with a made up id, which used to make a typo in a command silently add a player that does
+	 * not exist. This only returns players the server actually knows.
+	 *
+	 * @param name The name of the player
+	 * @return The player, or null when no player with that name has been on this server
+	 */
+	public static OfflinePlayer findOfflinePlayer(String name) {
+		if(name == null || name.isBlank()) {
+			return null;
+		}
+
+		Player online = Bukkit.getPlayerExact(name);
+		if(online != null) {
+			return online;
+		}
+		return Bukkit.getOfflinePlayerIfCached(name);
+	}
+
+	/**
 	 * Conversion from name to uuid.
 	 * @param name The name of the player
 	 * @return The uuid of the player
 	 */
-	@SuppressWarnings("deprecation") // Fake deprecation by Bukkit to inform developers, method will stay
 	public static String toUniqueId(String name) {
-		if(name == null) {
-			return null;
-		} else {
-			return Bukkit.getOfflinePlayer(name).getUniqueId().toString();
-		}
-
+		OfflinePlayer player = findOfflinePlayer(name);
+		return player == null ? null : player.getUniqueId().toString();
 	}
 
 }

@@ -1,10 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>areashop</artifactId>
     <packaging>jar</packaging>
     <name>AreaShop</name>
-    <version>2.6.0</version> <!-- Main plugin version -->
+    <version>2.7.0</version> <!-- Main plugin version -->
 
     <parent>
         <groupId>me.wiefferink</groupId>
@@ -13,157 +14,58 @@
     </parent>
 
     <dependencies>
-        <!-- Bukkit, AreaShop aims to support 1.7.9+ -->
+        <!-- Paper API, AreaShop targets Minecraft 26.2+ (Java 25) -->
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>craftbukkit</artifactId>
-            <version>1.13-R0.1-SNAPSHOT</version>
-            <type>jar</type>
-            <optional>true</optional>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
             <scope>provided</scope>
         </dependency>
 
-        <!-- InteractiveMessenger library -->
+        <!-- WorldEdit -->
         <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>interactivemessenger</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-bukkit</artifactId>
+            <version>${worldedit.version}</version>
+            <scope>provided</scope>
         </dependency>
 
-        <!-- BukkitDo library -->
+        <!-- WorldGuard -->
         <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>bukkitdo</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-
-        <!-- WorldEdit/WorldGuard -->
-        <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldedit</artifactId>
-            <scope>system</scope>
-            <version>any</version>
-            <systemPath>${project.basedir}/../dependencies/worldedit-bukkit-7.0.0-beta-04.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldguard</artifactId>
-            <scope>system</scope>
-            <version>any</version>
-            <systemPath>${project.basedir}/../dependencies/worldguard-legacy-7.0.0-beta-02.jar</systemPath>
-        </dependency>
-
-        <!-- Interfaces that specific WorldGuard and WorldEdit versions are built against -->
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-interface</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- Bukkit api implementations -->
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-bukkit-1_12</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-bukkit-1_13</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- WorldGuard implementations -->
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-worldguard-5</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-worldguard-6</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-worldguard-6_1_3</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-worldguard-7_beta_1</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-worldguard-7_beta_2</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- WorldEdit implementations -->
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-worldedit-5</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-worldedit-6</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-worldedit-7_beta_1</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-worldedit-7_beta_4</artifactId>
-            <version>latest</version>
-        </dependency>
-        <dependency>
-            <groupId>me.wiefferink</groupId>
-            <artifactId>areashop-fastasyncworldedit</artifactId>
-            <version>latest</version>
-            <type>jar</type>
-            <scope>compile</scope>
+            <groupId>com.sk89q.worldguard</groupId>
+            <artifactId>worldguard-bukkit</artifactId>
+            <version>${worldguard.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Vault -->
         <dependency>
-            <groupId>net.milkbowl.vault</groupId>
+            <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
-            <scope>system</scope>
-            <version>any</version>
-            <systemPath>${project.basedir}/../dependencies/VaultAPI-1.4.jar</systemPath>
+            <version>${vault.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- bStats -->
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bukkit</artifactId>
-            <version>1.1</version>
+            <version>${bstats.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -180,11 +82,11 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.8</version>
+                        <version>3.1.0</version>
                         <configuration>
                             <target>
                                 <copy file="./target/${project.build.finalName}.jar"
-                                      tofile="${copyResult}\${project.build.finalName}.jar"/>
+                                      tofile="${copyResult}/${project.build.finalName}.jar"/>
                             </target>
                         </configuration>
                         <executions>
@@ -213,7 +115,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.0</version>
+                        <version>3.3.1</version>
                         <executions>
                             <execution>
                                 <phase>package</phase>
@@ -241,7 +143,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.11.2</version>
                         <executions>
                             <execution>
                                 <phase>package</phase>
@@ -252,12 +154,10 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <excludePackageNames>me.wiefferink.areashop.lib</excludePackageNames>
                             <destDir>${javadoc}</destDir>
                             <links>
-                                <link>https://hub.spigotmc.org/javadocs/bukkit/</link>
-                                <link>http://docs.sk89q.com/worldedit/apidocs/</link>
-                                <link>http://docs.sk89q.com/worldguard/apidocs/</link>
+                                <link>https://jd.papermc.io/paper/26.2/</link>
+                                <link>https://intellectualsites.github.io/worldedit-javadocs/</link>
                             </links>
                         </configuration>
                     </plugin>
@@ -288,7 +188,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -296,17 +196,13 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.bstats:*</include>
+                                </includes>
+                            </artifactSet>
                             <relocations>
-                                <!-- Relocate messaging framework -->
-                                <relocation>
-                                    <pattern>me.wiefferink.interactivemessenger</pattern>
-                                    <shadedPattern>me.wiefferink.areashop.shaded.interactivemessenger</shadedPattern>
-                                </relocation>
-                                <!-- Relocate BukkitDo -->
-                                <relocation>
-                                    <pattern>me.wiefferink.bukkitdo</pattern>
-                                    <shadedPattern>me.wiefferink.areashop.shaded.bukkitdo</shadedPattern>
-                                </relocation>
                                 <!-- Relocate bstats -->
                                 <relocation>
                                     <pattern>org.bstats</pattern>
@@ -319,7 +215,11 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.13.0</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
             </plugin>
         </plugins>
     </build>

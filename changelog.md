@@ -1,6 +1,56 @@
 ## AreaShop NEXT
 [**Planned features**](https://github.com/NLthijs48/AreaShop/milestone/5) 
 
+## AreaShop 2.7.0
+Support for Minecraft 26.2. This release drops support for every Minecraft version before it, see the
+requirements below before updating.
+
+**Requirements:**
+* Minecraft **26.2** or later, on Paper or a Paper fork (Spigot is no longer enough, AreaShop uses the Adventure API)
+* **Java 25**, which Minecraft 26.1 and later require anyway
+* **WorldGuard 7.0.17+** and **WorldEdit 7.4.4+**
+
+**Features:**
+* Hex colors, everywhere AreaShop reads text: `&#FF00AA`, the short `&#F0A`, and the `[#FF00AA]` tag.
+  They work in `config.yml`, `default.yml`, the language files, the chat prefix and on signs.
+* Signs are written with chat components instead of plain strings, so signs can show hex colors too.
+* Signs of every wood type are supported, including bamboo, cherry, crimson, warped, pale oak and
+  hanging signs. Which materials count as a sign now comes from the vanilla block tags, so future wood
+  types work without a plugin update.
+* Regions saved by older AreaShop versions keep working: the old `SIGN`, `SIGN_POST` and `WALL_SIGN`
+  types in region files are read as their oak equivalents.
+
+**Fixed:**
+* Prices are no longer evaluated by the JavaScript engine, which was removed from Java in version 15
+  and made every price setting a way to run arbitrary code. Expressions like `5*%volume%` still work,
+  through an evaluator that only does arithmetic. Prices that relied on running actual JavaScript
+  statements have to be rewritten as a plain expression.
+* Looking up a player by name no longer invents a player that never played on the server, so a typo in
+  `/as addfriend`, `/as setlandlord`, `/as setowner` or `/as me` reports the mistake instead of
+  silently adding an id belonging to nobody.
+* Finding the regions at a location uses the WorldGuard region index instead of walking over every
+  region in the world, which is noticeably faster on servers with many regions.
+* Reading a sign that is being created no longer throws when a line is empty.
+* A sign whose saved type is not a sign on this server is reported clearly instead of leaving an
+  invisible broken sign behind.
+* `useFancyMessages` and `useColorsInConsole` from `config.yml` are honoured again.
+* The update check reads the whole GitHub response instead of only its first line, and no longer sends
+  a request body on a GET.
+* Registering the limit group permissions no longer depends on a permission from an unrelated plugin.
+
+**Technical:**
+* Built against `paper-api` 26.2, WorldGuard 7.0.17 and WorldEdit 7.4.4, all resolved from their own
+  repositories again instead of jars checked into the repository.
+* The fourteen Maven modules that existed to support Minecraft 1.7 through 1.13 are gone, AreaShop is
+  one module with one WorldGuard, WorldEdit and Bukkit handler.
+* The `InteractiveMessenger` and `BukkitDo` libraries are part of the source tree now. Their repository
+  is gone, and the message framework built its chat messages through NMS reflection, which stopped
+  working many versions ago. Messages are built with the Adventure API instead. The message format in
+  the language files is unchanged.
+* Replaced `json-simple` and `commons-lang`, neither of which the server ships anymore.
+* bStats updated from 1.1 to 3.2.1.
+* Added tests for the color, markup and price expression handling.
+
 ## AreaShop 2.6.0
 **Features:**
 * Add 1.13 FastAsyncWorldEdit support (note: FastAsyncWorldEdit does seem to work correctly for 1.13.0, but not yet on 1.13.2)

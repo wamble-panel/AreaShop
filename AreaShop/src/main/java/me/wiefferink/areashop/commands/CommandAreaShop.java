@@ -1,8 +1,7 @@
 package me.wiefferink.areashop.commands;
 
 import me.wiefferink.areashop.AreaShop;
-import me.wiefferink.interactivemessenger.processing.Message;
-import org.apache.commons.lang.StringUtils;
+import me.wiefferink.areashop.messages.Message;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -31,7 +30,7 @@ public abstract class CommandAreaShop {
 	 * @return true if it can execute the command, false otherwise
 	 */
 	public boolean canExecute(Command command, String[] args) {
-		String commandString = command.getName() + " " + StringUtils.join(args, " ");
+		String commandString = command.getName() + " " + Utils.join(args, " ");
 		if(commandString.length() > getCommandStart().length()) {
 			return commandString.toLowerCase().startsWith(getCommandStart().toLowerCase() + " ");
 		}
@@ -77,7 +76,7 @@ public abstract class CommandAreaShop {
 	 * @return true if confirmed, false if confirmation is required
 	 */
 	public boolean confirm(CommandSender sender, String[] args, Message message) {
-		String command = "/" + getCommandStart() + " " + StringUtils.join(args, " ", 1, args.length);
+		String command = "/" + getCommandStart() + " " + Utils.join(args, " ", 1, args.length);
 		long now = System.currentTimeMillis();
 		CommandTime last = lastUsed.get(sender.getName());
 		if(last != null && last.command.equalsIgnoreCase(command) && last.time > (now - 1000 * 60)) {

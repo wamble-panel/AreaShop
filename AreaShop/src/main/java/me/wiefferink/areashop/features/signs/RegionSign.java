@@ -5,13 +5,16 @@ import me.wiefferink.areashop.AreaShop;
 import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.tools.Materials;
 import me.wiefferink.areashop.tools.Utils;
-import me.wiefferink.interactivemessenger.processing.Message;
+import me.wiefferink.areashop.messages.Message;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
+import org.bukkit.block.sign.SignSide;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -97,12 +100,14 @@ public class RegionSign {
 
 	/**
 	 * Get the material of the sign as saved in the config.
-	 * @return Material of the sign, usually {@link Material#WALL_SIGN}, {@link Material#SIGN}, or one of the other wood types (different result for 1.13-), Material.AIR if none.
+	 *
+	 * <p>Regions saved by AreaShop 2.6 and older have the pre-1.14 names written in their config,
+	 * those are translated to the matching oak variant.
+	 *
+	 * @return Material of the sign, or null when the config does not hold a usable sign type
 	 */
 	public Material getMaterial() {
-		String name = getRegion().getConfig().getString("general.signs." + key + ".signType");
-		Material result = Materials.signNameToMaterial(name);
-		return result == null ? Material.AIR : result;
+		return Materials.signNameToMaterial(getRegion().getConfig().getString("general.signs." + key + ".signType"));
 	}
 
 	/**
@@ -147,6 +152,11 @@ public class RegionSign {
 		// Place the sign back (with proper rotation and type) after it has been hidden or (indirectly) destroyed
 		if(!Materials.isSign(block.getType())) {
 			Material signType = getMaterial();
+			if(signType == null) {
+				AreaShop.warn("Sign", key, "of region", getRegion().getName(), "cannot be placed back, its saved sign type",
+						"'" + getRegion().getConfig().getString("general.signs." + key + ".signType") + "' is not a sign on this server version");
+				return false;
+			}
 			// Don't do physics here, we first need to update the direction
 			block.setType(signType, false);
 
@@ -172,15 +182,15 @@ public class RegionSign {
 		}
 
 		// Apply replacements and color and then set it on the sign
-		Sign signState = (Sign) block.getState();
+		Sign signState = (Sign)block.getState();
+		SignSide front = signState.getSide(Side.FRONT);
 		for(int i = 0; i < signLines.length; i++) {
 			if(signLines[i] == null) {
-				signState.setLine(i, "");
+				front.line(i, Component.empty());
 				continue;
 			}
-			signLines[i] = Message.fromString(signLines[i]).replacements(getRegion()).getSingle();
-			signLines[i] = Utils.applyColors(signLines[i]);
-			signState.setLine(i, signLines[i]);
+			// Components keep hex colors intact, which the old string lines could not
+			front.line(i, Message.fromString(signLines[i]).replacements(getRegion()).toComponent());
 		}
 		signState.update();
 		return true;

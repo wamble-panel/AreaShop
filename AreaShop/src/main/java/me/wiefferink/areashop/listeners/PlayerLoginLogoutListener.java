@@ -5,7 +5,7 @@ import me.wiefferink.areashop.regions.BuyRegion;
 import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.regions.RentRegion;
 import me.wiefferink.areashop.tools.Utils;
-import me.wiefferink.bukkitdo.Do;
+import me.wiefferink.areashop.tools.Do;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

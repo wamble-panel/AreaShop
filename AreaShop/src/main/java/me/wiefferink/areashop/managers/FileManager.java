@@ -1,6 +1,6 @@
 package me.wiefferink.areashop.managers;
 
-import com.google.common.base.Charsets;
+import java.nio.charset.StandardCharsets;
 import com.google.common.io.Files;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -16,7 +16,7 @@ import me.wiefferink.areashop.regions.GeneralRegion.RegionType;
 import me.wiefferink.areashop.regions.RegionGroup;
 import me.wiefferink.areashop.regions.RentRegion;
 import me.wiefferink.areashop.tools.Utils;
-import me.wiefferink.bukkitdo.Do;
+import me.wiefferink.areashop.tools.Do;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -617,11 +617,7 @@ public class FileManager extends Manager {
 				RegionManager manager = plugin.getRegionManager(bukkitWorld);
 				if(manager != null) {
 					try {
-						if(plugin.getWorldGuard().getDescription().getVersion().startsWith("5.")) {
-							manager.save();
-						} else {
-							manager.saveChanges();
-						}
+						manager.saveChanges();
 					} catch(Exception e) {
 						AreaShop.warn("WorldGuard regions in world " + world + " could not be saved");
 					}
@@ -746,7 +742,7 @@ public class FileManager extends Manager {
 	}
 
 	/**
-	 * Load the default.yml file
+	 * Load the default.yml file.
 	 * @return true if it has been loaded successfully, otherwise false
 	 */
 	public boolean loadDefaultFile() {
@@ -770,8 +766,8 @@ public class FileManager extends Manager {
 		}
 		// Load default.yml from the plugin folder, and as backup the default one
 		try(
-				InputStreamReader custom = new InputStreamReader(new FileInputStream(defaultFile), Charsets.UTF_8);
-				InputStreamReader normal = new InputStreamReader(plugin.getResource(AreaShop.defaultFile), Charsets.UTF_8)
+				InputStreamReader custom = new InputStreamReader(new FileInputStream(defaultFile), StandardCharsets.UTF_8);
+				InputStreamReader normal = new InputStreamReader(plugin.getResource(AreaShop.defaultFile), StandardCharsets.UTF_8)
 		) {
 			defaultConfig = YamlConfiguration.loadConfiguration(custom);
 			if(defaultConfig.getKeys(false).isEmpty()) {
@@ -786,7 +782,7 @@ public class FileManager extends Manager {
 	}
 
 	/**
-	 * Load the default.yml file
+	 * Load the default.yml file.
 	 * @return true if it has been loaded successfully, otherwise false
 	 */
 	public boolean loadConfigFile() {
@@ -810,9 +806,9 @@ public class FileManager extends Manager {
 		}
 		// Load config.yml from the plugin folder
 		try(
-				InputStreamReader custom = new InputStreamReader(new FileInputStream(configFile), Charsets.UTF_8);
-				InputStreamReader normal = new InputStreamReader(plugin.getResource(AreaShop.configFile), Charsets.UTF_8);
-				InputStreamReader hidden = new InputStreamReader(plugin.getResource(AreaShop.configFileHidden), Charsets.UTF_8)
+				InputStreamReader custom = new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8);
+				InputStreamReader normal = new InputStreamReader(plugin.getResource(AreaShop.configFile), StandardCharsets.UTF_8);
+				InputStreamReader hidden = new InputStreamReader(plugin.getResource(AreaShop.configFileHidden), StandardCharsets.UTF_8)
 		) {
 			config = YamlConfiguration.loadConfiguration(custom);
 			if(config.getKeys(false).isEmpty()) {
@@ -840,7 +836,7 @@ public class FileManager extends Manager {
 	}
 
 	/**
-	 * Load the groups.yml file from disk
+	 * Load the groups.yml file from disk.
 	 * @return true if succeeded, otherwise false
 	 */
 	public boolean loadGroupsFile() {
@@ -848,7 +844,7 @@ public class FileManager extends Manager {
 		File groupFile = new File(groupsPath);
 		if(groupFile.exists() && groupFile.isFile()) {
 			try(
-					InputStreamReader reader = new InputStreamReader(new FileInputStream(groupFile), Charsets.UTF_8)
+					InputStreamReader reader = new InputStreamReader(new FileInputStream(groupFile), StandardCharsets.UTF_8)
 			) {
 				groupsConfig = YamlConfiguration.loadConfiguration(reader);
 			} catch(IOException e) {
@@ -901,7 +897,7 @@ public class FileManager extends Manager {
 				// Load the region file from disk in UTF8 mode
 				YamlConfiguration regionConfig;
 				try(
-						InputStreamReader reader = new InputStreamReader(new FileInputStream(regionFile), Charsets.UTF_8)
+						InputStreamReader reader = new InputStreamReader(new FileInputStream(regionFile), StandardCharsets.UTF_8)
 				) {
 					regionConfig = YamlConfiguration.loadConfiguration(reader);
 					if(regionConfig.getKeys(false).isEmpty()) {

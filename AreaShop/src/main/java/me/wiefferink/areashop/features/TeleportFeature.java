@@ -479,7 +479,13 @@ public class TeleportFeature extends RegionFeature {
 		return name.contains("LAVA")
 				|| name.contains("CACTUS")
 				|| name.equals("FIRE")
-				|| name.contains("MAGMA");
+				|| name.equals("SOUL_FIRE")
+				|| name.contains("CAMPFIRE")
+				|| name.contains("MAGMA")
+				|| name.equals("POWDER_SNOW")
+				|| name.equals("SWEET_BERRY_BUSH")
+				|| name.equals("WITHER_ROSE")
+				|| name.equals("POINTED_DRIPSTONE");
 	}
 
 	/**

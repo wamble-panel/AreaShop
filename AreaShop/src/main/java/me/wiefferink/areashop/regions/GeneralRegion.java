@@ -12,10 +12,9 @@ import me.wiefferink.areashop.features.signs.SignsFeature;
 import me.wiefferink.areashop.interfaces.GeneralRegionInterface;
 import me.wiefferink.areashop.managers.FileManager;
 import me.wiefferink.areashop.tools.Utils;
-import me.wiefferink.bukkitdo.Do;
-import me.wiefferink.interactivemessenger.processing.Message;
-import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import me.wiefferink.areashop.tools.Do;
+import me.wiefferink.areashop.messages.Message;
+import me.wiefferink.areashop.messages.ReplacementProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -849,7 +848,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	// CONFIG
 
 	/**
-	 * Get a boolean setting for this region, defined as follows
+	 * Get a boolean setting for this region, defined as follows.
 	 * - If the region has the setting in its own file (/regions/regionName.yml), use that
 	 * - If the region has groups, use the setting defined by the most important group, if any
 	 * - Otherwise fallback to the default.yml file setting
@@ -892,7 +891,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	}
 
 	/**
-	 * Get a boolean setting for this region, defined as follows
+	 * Get a boolean setting for this region, defined as follows.
 	 * - If the region has the setting in its own file (/regions/regionName.yml), use that
 	 * - If the region has groups, use the setting defined by the most important group, if any
 	 * - Otherwise fallback to the default.yml file setting
@@ -925,7 +924,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	}
 
 	/**
-	 * Get a double setting for this region, defined as follows
+	 * Get a double setting for this region, defined as follows.
 	 * - If the region has the setting in its own file (/regions/regionName.yml), use that
 	 * - If the region has groups, use the setting defined by the most important group, if any
 	 * - Otherwise fallback to the default.yml file setting
@@ -958,7 +957,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	}
 
 	/**
-	 * Get a long setting for this region, defined as follows
+	 * Get a long setting for this region, defined as follows.
 	 * - If the region has the setting in its own file (/regions/regionName.yml), use that
 	 * - If the region has groups, use the setting defined by the most important group, if any
 	 * - Otherwise fallback to the default.yml file setting
@@ -991,7 +990,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	}
 
 	/**
-	 * Get a string setting for this region, defined as follows
+	 * Get a string setting for this region, defined as follows.
 	 * - If the region has the setting in its own file (/regions/regionName.yml), use that
 	 * - If the region has groups, use the setting defined by the most important group, if any
 	 * - Otherwise fallback to the default.yml file setting
@@ -1024,7 +1023,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	}
 
 	/**
-	 * Get a string list setting for this region, defined as follows
+	 * Get a string list setting for this region, defined as follows.
 	 * - If the region has the setting in its own file (/regions/regionName.yml), use that
 	 * - If the region has groups, use the setting defined by the most important group, if any
 	 * - Otherwise fallback to the default.yml file setting
@@ -1057,7 +1056,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	}
 
 	/**
-	 * Get a configuration section setting for this region, defined as follows
+	 * Get a configuration section setting for this region, defined as follows.
 	 * - If the region has the setting in its own file (/regions/regionName.yml), use that
 	 * - If the region has groups, use the setting defined by the most important group, if any
 	 * - Otherwise fallback to the default.yml file setting
@@ -1090,7 +1089,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	}
 
 	/**
-	 * Get a configuration section setting for this region, defined as follows
+	 * Get a configuration section setting for this region, defined as follows.
 	 * - If the region has the setting in its own file (/regions/regionName.yml), use that
 	 * - If the region has groups, use the setting defined by the most important group, if any
 	 * - Otherwise fallback to the default.yml file setting
@@ -1103,7 +1102,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	}
 
 	/**
-	 * Get a configuration section setting for this region, defined as follows
+	 * Get a configuration section setting for this region, defined as follows.
 	 * - If earlyResult is non-null, use that
 	 * - Else if the region has the setting in its own file (/regions/regionName.yml), use that
 	 * - Else if the region has groups, use the setting defined by the most important group, if any
@@ -1361,7 +1360,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	}
 
 	/**
-	 * Get the amount of regions a player has matching a certain limits group (config.yml -- limitGroups)
+	 * Get the amount of regions a player has matching a certain limits group (config.yml -- limitGroups).
 	 * @param player     The player to check the amount for
 	 * @param limitGroup The group to check
 	 * @param regions    All the regions a player has bought or rented
@@ -1461,7 +1460,7 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 			} catch(CommandException e) {
 				result = false;
 				error = e.getMessage();
-				stacktrace = ExceptionUtils.getStackTrace(e);
+				stacktrace = Utils.getStackTrace(e);
 			}
 			boolean printed = false;
 			if(!result) {

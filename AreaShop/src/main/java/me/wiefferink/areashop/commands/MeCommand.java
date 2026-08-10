@@ -45,7 +45,7 @@ public class MeCommand extends CommandAreaShop {
 			player = (OfflinePlayer)sender;
 		}
 		if(args.length > 1) {
-			player = Bukkit.getOfflinePlayer(args[1]);
+			player = Utils.findOfflinePlayer(args[1]);
 			if(player == null) {
 				plugin.message(sender, "me-noPlayer", args[1]);
 				return;

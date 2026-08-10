@@ -35,6 +35,7 @@ AreaShop allows you selling and renting regions to players. It could be used to 
 * [Signs](https://github.com/NLthijs48/AreaShop/wiki/Basic-regions-setup) for easy interaction (rent/buy/unrent/sell/information) and current status (layout and actions customizable, multiple signs can be added).
 * ![rented-sign](https://cloud.githubusercontent.com/assets/6951068/21939029/3844896a-d9be-11e6-8492-7a23ec71fce2.png)
 * Messages that can be clicked for more information and actions ([language](https://github.com/NLthijs48/AreaShop/wiki/Language-support) can be changed, as well as click/hover actions).
+* Full RGB colors in messages and on signs, written as `&#FF00AA` or `[#FF00AA]`, next to the classic `&a` codes.
 * ![region-information-message](https://cloud.githubusercontent.com/assets/6951068/21939161/bff2fe3c-d9be-11e6-802f-4a0bce073c64.png)
 * Change the  of the plugin or use of of the already provided language files (check [here](https://github.com/NLthijs48/AreaShop/tree/master/AreaShop/src/main/resources/lang))
 * Automatically restore the region to its original state when sold: [restore](https://github.com/NLthijs48/AreaShop/wiki/Region-blocks-save-restore) the region with schematics.
@@ -64,19 +65,21 @@ For a preview join 'mc.go-craft.com' and go to the Survival server, the shops ar
 Old video for AreaShop v1.0: [Tutorial by VariationVault](https://www.youtube.com/watch?v=k2HMCxCCOYo)
 
 ### Required dependencies
-* Java 7 or higher (latest recommended)
-* Bukkit/Spigot 1.7.9 or higher (modded servers often include Bukkit/Spigot support, so it should also work on that, but it is not specifically tested for it)
-* [WorldGuard](http://dev.bukkit.org/bukkit-plugins/worldguard/): 5.9 or higher (6.0+ recommended)
-* [WorldEdit](http://dev.bukkit.org/bukkit-plugins/worldedit/): 5.6.3 or higher (6.0+ recommended)
-* [Vault](http://dev.bukkit.org/bukkit-plugins/vault/): 1.4.1 or higher
-* An economy plugin supported by Vault (check the [Vault page](http://dev.bukkit.org/bukkit-plugins/vault/) for a list of these)
+* Java 25 or higher, which Minecraft 26.1 and later require anyway
+* [Paper](https://papermc.io/) 26.2 or higher, or a fork of it. Plain Spigot is not enough, AreaShop uses the Adventure API that Paper provides
+* [WorldGuard](https://enginehub.org/worldguard): 7.0.17 or higher
+* [WorldEdit](https://enginehub.org/worldedit): 7.4.4 or higher
+* [Vault](https://www.spigotmc.org/resources/vault.34315/): 1.7 or higher
+* An economy plugin supported by Vault
+
+Older Minecraft versions are supported by [AreaShop 2.6.0](https://github.com/NLthijs48/AreaShop/releases), which runs on Bukkit 1.7.9 through 1.13.
 
 ### Metrics
-This plugin utilizes Hidendra's plugin metrics system, which means that the following information is collected and sent to mcstats.org:
+This plugin uses [bStats](https://bstats.org), which means that the following information is collected and sent to bstats.org:
 
 *A unique identifier, the server's version of Java, whether the server is in offline or online mode, the plugin's version, the server's version, the OS version/name and architecture, the core count for the CPU, the number of players online, the Metrics version.*
 
-This information will give me an indication how much the plugin is used and encourages me to continue development. Opting out of this service can be done by setting `sendStats` in the config of this plugin to `false`, if you want to disable Metrics for any plugin go to `plugins/Plugin Metrics/config.yml` and change `opt-out` to `true`. Check graphs of the statistics at this page: [mcstats.org/plugin/AreaShop](http://mcstats.org/plugin/AreaShop)
+This information will give me an indication how much the plugin is used and encourages me to continue development. Opting out of this service can be done by setting `sendStats` in the config of this plugin to `false`, if you want to disable it for every plugin at once go to `plugins/bStats/config.yml` and change `enabled` to `false`. Check graphs of the statistics at this page: [bstats.org/plugin/bukkit/AreaShop](https://bstats.org/plugin/bukkit/AreaShop)
 
 ### Do you want to translate AreaShop?
 Help translating the plugin into different languages and to keep the translations up to date. Go to [this page](https://github.com/NLthijs48/AreaShop/wiki/Language-support#translating-on-transifex) for more information. Translating goes through the [Transifex](https://www.transifex.com/projects/p/areashop/) website and is very easy, sending files back and forth is not needed, you can translate lines online and whenever you want. Every line you translate will be saved, no need to do it all at once (this also allows for easy collaboration).

@@ -12,7 +12,9 @@ import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.regions.RentRegion;
 import me.wiefferink.areashop.tools.Materials;
 import me.wiefferink.areashop.tools.Utils;
-import me.wiefferink.bukkitdo.Do;
+import me.wiefferink.areashop.tools.Do;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -192,16 +194,16 @@ public class SignsFeature extends RegionFeature {
 		}
 
 		// Check if the sign is meant for this plugin
-		if(event.getLine(0).contains(plugin.getConfig().getString("signTags.rent"))) {
+		if(signLine(event, 0).contains(plugin.getConfig().getString("signTags.rent"))) {
 			if(!player.hasPermission("areashop.createrent") && !player.hasPermission("areashop.createrent.member") && !player.hasPermission("areashop.createrent.owner")) {
 				plugin.message(player, "setup-noPermissionRent");
 				return;
 			}
 
 			// Get the other lines
-			String secondLine = event.getLine(1);
-			String thirdLine = event.getLine(2);
-			String fourthLine = event.getLine(3);
+			String secondLine = signLine(event, 1);
+			String thirdLine = signLine(event, 2);
+			String fourthLine = signLine(event, 3);
 
 			// Get the regionManager for accessing regions
 			RegionManager regionManager = plugin.getRegionManager(event.getPlayer().getWorld());
@@ -303,7 +305,7 @@ public class SignsFeature extends RegionFeature {
 				// Update the region after the event has written its lines
 				Do.sync(rent::update);
 			}
-		} else if(event.getLine(0).contains(plugin.getConfig().getString("signTags.buy"))) {
+		} else if(signLine(event, 0).contains(plugin.getConfig().getString("signTags.buy"))) {
 			// Check for permission
 			if(!player.hasPermission("areashop.createbuy") && !player.hasPermission("areashop.createbuy.member") && !player.hasPermission("areashop.createbuy.owner")) {
 				plugin.message(player, "setup-noPermissionBuy");
@@ -311,8 +313,8 @@ public class SignsFeature extends RegionFeature {
 			}
 
 			// Get the other lines
-			String secondLine = event.getLine(1);
-			String thirdLine = event.getLine(2);
+			String secondLine = signLine(event, 1);
+			String thirdLine = signLine(event, 2);
 
 			// Get the regionManager for accessing regions
 			RegionManager regionManager = plugin.getRegionManager(event.getPlayer().getWorld());
@@ -407,7 +409,7 @@ public class SignsFeature extends RegionFeature {
 				// Update the region after the event has written its lines
 				Do.sync(buy::update);
 			}
-		} else if(event.getLine(0).contains(plugin.getConfig().getString("signTags.add"))) {
+		} else if(signLine(event, 0).contains(plugin.getConfig().getString("signTags.add"))) {
 			// Check for permission
 			if(!player.hasPermission("areashop.addsign")) {
 				plugin.message(player, "addsign-noPermission");
@@ -415,8 +417,8 @@ public class SignsFeature extends RegionFeature {
 			}
 
 			// Get the other lines
-			String secondLine = event.getLine(1);
-			String thirdLine = event.getLine(2);
+			String secondLine = signLine(event, 1);
+			String thirdLine = signLine(event, 2);
 
 			GeneralRegion region;
 			if(secondLine != null && !secondLine.isEmpty()) {
@@ -573,9 +575,24 @@ public class SignsFeature extends RegionFeature {
 	}
 
 	/**
+	 * Read a line of a sign that is being changed as readable text.
+	 *
+	 * <p>Never returns null, which the old string based event methods could, and reads through
+	 * any formatting the player put on the line.
+	 *
+	 * @param event The event to read from
+	 * @param index Index of the line, starting at 0
+	 * @return The text on the line, empty when there is none
+	 */
+	private static String signLine(SignChangeEvent event, int index) {
+		Component line = event.line(index);
+		return line == null ? "" : PlainTextComponentSerializer.plainText().serialize(line);
+	}
+
+	/**
 	 * Add a sign to this region.
 	 * @param location The location of the sign
-	 * @param signType The type of the sign (WALL_SIGN or SIGN_POST)
+	 * @param signType The material of the sign, for example OAK_WALL_SIGN
 	 * @param facing   The orientation of the sign
 	 * @param profile  The profile to use with this sign (null for default)
 	 */

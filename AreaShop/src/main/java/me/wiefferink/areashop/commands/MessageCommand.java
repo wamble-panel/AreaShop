@@ -1,8 +1,7 @@
 package me.wiefferink.areashop.commands;
 
 import me.wiefferink.areashop.tools.Utils;
-import me.wiefferink.interactivemessenger.processing.Message;
-import org.apache.commons.lang.StringUtils;
+import me.wiefferink.areashop.messages.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -43,7 +42,7 @@ public class MessageCommand extends CommandAreaShop {
 
 		String[] messageArgs = new String[args.length - 2];
 		System.arraycopy(args, 2, messageArgs, 0, args.length - 2);
-		String message = StringUtils.join(messageArgs, " ");
+		String message = Utils.join(messageArgs, " ");
 
 		Message.fromString(message).send(player);
 	}
