@@ -140,6 +140,7 @@ maximumTries: 50000
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 # If a tag has no value (for example %player% when the region is not rented/bought) then the tag will not get replaced.
 # %region%         The region name (with correct capitalization).
+# %shopname%       The name the region is shown under, set by an admin with '/as setname', the region name when unset.
 # %player%         The name of the player that rents/buys the region (with correct capitalization).
 # %uuid%           The UUID of the player that rents/buys the region.
 # %friends%        The names of friends added to this region separated by ', '.

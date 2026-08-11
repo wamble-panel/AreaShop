@@ -56,6 +56,7 @@ permissions:
       areashop.notifyupdate: true
       areashop.stack: true
       areashop.setlandlord: true
+      areashop.setname: true
       areashop.linksigns: true
       areashop.message: true
       areashop.import: true
@@ -262,6 +263,9 @@ permissions:
     default: op
   areashop.setlandlord:
     description: Allows you to set the landlord of a region, the landlord receives all revenue
+    default: op
+  areashop.setname:
+    description: Allows you to set the name a region is shown under, players renting or buying a region cannot change it
     default: op
   areashop.message:
     description: Allows you to send AreaShop messages to players

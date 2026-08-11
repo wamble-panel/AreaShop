@@ -45,6 +45,8 @@ adding:
 # ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 # │ OTHER: All other settings.                                                                                                 │
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+# How many visible characters the name set with '/as setname' may have (color codes do not count).
+shopNameMaxLength: 64
 # Service id of AreaShop on https://bstats.org, only change this when you run a fork with its own statistics page.
 bstatsId: 3204
 # Allow or disallow extending a rental region when the player is above his limits enforced by the 'limitGroups' section below.

@@ -84,6 +84,7 @@ public final class AreaShop extends JavaPlugin {
 	public static final String tagPlayerUUID = "uuid";
 	public static final String tagWorldName = "world";
 	public static final String tagRegionName = "region";
+	public static final String tagShopName = "shopname";
 	public static final String tagRegionType = "type";
 	public static final String tagPrice = "price";
 	public static final String tagRawPrice = "rawprice";

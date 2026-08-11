@@ -26,6 +26,7 @@ import me.wiefferink.areashop.commands.SchematiceventCommand;
 import me.wiefferink.areashop.commands.SellCommand;
 import me.wiefferink.areashop.commands.SetdurationCommand;
 import me.wiefferink.areashop.commands.SetlandlordCommand;
+import me.wiefferink.areashop.commands.SetnameCommand;
 import me.wiefferink.areashop.commands.SetownerCommand;
 import me.wiefferink.areashop.commands.SetpriceCommand;
 import me.wiefferink.areashop.commands.SetrestoreCommand;
@@ -83,6 +84,7 @@ public class CommandManager extends Manager implements CommandExecutor, TabCompl
 		commands.add(new LinksignsCommand());
 		commands.add(new StackCommand());
 		commands.add(new SetlandlordCommand());
+		commands.add(new SetnameCommand());
 		commands.add(new MessageCommand());
 		commands.add(new ImportCommand());
 

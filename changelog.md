@@ -11,6 +11,12 @@ requirements below before updating.
 * **WorldGuard 7.0.17+** and **WorldEdit 7.4.4+**
 
 **Features:**
+* Shop names: `/as setname <region> <name>` sets the name a region is shown under, available as
+  `%shopname%` in messages, on signs and in region flags. Meant for marketplace servers where a
+  region id like `market_47` means nothing to a player. Only an administrator can set it, the player
+  renting or buying the region cannot change it. `%shopname%` falls back to the region name when no
+  name is set, so it is always safe to use, and `/as setname <region> reset` clears it again.
+  Requires the `areashop.setname` permission and takes color codes, including hex ones.
 * Hex colors, everywhere AreaShop reads text: `&#FF00AA`, the short `&#F0A`, and the `[#FF00AA]` tag.
   They work in `config.yml`, `default.yml`, the language files, the chat prefix and on signs.
 * Signs are written with chat components instead of plain strings, so signs can show hex colors too.

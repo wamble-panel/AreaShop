@@ -595,6 +595,43 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 		return result;
 	}
 
+	/**
+	 * Get the display name of this region, the name a marketplace shows to players.
+	 *
+	 * <p>Falls back to the region name, so {@code %shopname%} can be used in a sign profile or a
+	 * message without having to check whether a name was ever set.
+	 *
+	 * @return The display name, or the region name when none is set
+	 */
+	public String getDisplayName() {
+		String displayName = getStringSetting("general.displayName");
+		if(displayName == null || displayName.isBlank()) {
+			return getName();
+		}
+		return displayName;
+	}
+
+	/**
+	 * Check if a display name has been set for this region.
+	 * @return true when this region has a display name of its own
+	 */
+	public boolean hasDisplayName() {
+		String displayName = getStringSetting("general.displayName");
+		return displayName != null && !displayName.isBlank();
+	}
+
+	/**
+	 * Set the display name of this region.
+	 *
+	 * <p>Only meant to be changed by an administrator, the player renting or buying the region
+	 * has no say over it.
+	 *
+	 * @param displayName The name to show, or null to go back to using the region name
+	 */
+	public void setDisplayName(String displayName) {
+		setSetting("general.displayName", displayName == null || displayName.isBlank() ? null : displayName);
+	}
+
 	@Override
 	public Object provideReplacement(String variable) {
 		switch(variable) {
@@ -602,6 +639,8 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 			// Basics
 			case AreaShop.tagRegionName:
 				return getName();
+			case AreaShop.tagShopName:
+				return getDisplayName();
 			case AreaShop.tagRegionType:
 				return getType().getValue().toLowerCase();
 			case AreaShop.tagWorldName:

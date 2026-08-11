@@ -266,6 +266,9 @@ public class InfoCommand extends CommandAreaShop {
 
 					if(rent != null) {
 						plugin.message(sender, "info-regionHeaderRent", rent);
+						if(rent.hasDisplayName()) {
+							plugin.messageNoPrefix(sender, "info-regionShopName", rent);
+						}
 						if(rent.isRented()) {
 							plugin.messageNoPrefix(sender, "info-regionRented", rent);
 							plugin.messageNoPrefix(sender, "info-regionExtending", rent);
@@ -351,6 +354,9 @@ public class InfoCommand extends CommandAreaShop {
 						plugin.messageNoPrefix(sender, "info-regionFooterRent", rent);
 					} else if(buy != null) {
 						plugin.message(sender, "info-regionHeaderBuy", buy);
+						if(buy.hasDisplayName()) {
+							plugin.messageNoPrefix(sender, "info-regionShopName", buy);
+						}
 						if(buy.isSold()) {
 							if(buy.isInResellingMode()) {
 								plugin.messageNoPrefix(sender, "info-regionReselling", buy);
