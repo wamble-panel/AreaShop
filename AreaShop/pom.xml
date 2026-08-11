@@ -217,6 +217,11 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
+                <configuration>
+                    <!-- Name the deprecated API being used instead of only counting it, so that
+                         server updates that deprecate something get noticed while porting -->
+                    <showDeprecation>true</showDeprecation>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
