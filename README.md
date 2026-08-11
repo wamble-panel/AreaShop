@@ -18,7 +18,7 @@
 [►Open issues](https://github.com/NLthijs48/AreaShop/issues)<br/>
 **Development:**
 [►Changelog](https://github.com/NLthijs48/AreaShop/blob/master/changelog.md)&nbsp;&nbsp;
-[►Compiling](https://github.com/NLthijs48/AreaShop/wiki/Compiling-AreaShop)&nbsp;&nbsp;
+[►Building](#building)&nbsp;&nbsp;
 [►Modules/classes overview](https://github.com/NLthijs48/AreaShop/wiki/Modules,-packages-and-classes-overview)
 [►Javadocs](https://wiefferink.me/AreaShop/javadocs/)
 [►Development builds](http://jenkins.wiefferink.me/job/AreaShop)<br/>
@@ -73,6 +73,17 @@ Old video for AreaShop v1.0: [Tutorial by VariationVault](https://www.youtube.co
 * An economy plugin supported by Vault
 
 Older Minecraft versions are supported by [AreaShop 2.6.0](https://github.com/NLthijs48/AreaShop/releases), which runs on Bukkit 1.7.9 through 1.13.
+
+### Building
+Everything AreaShop needs is fetched from Maven repositories, there is nothing to install by hand.
+
+* **Command line:** `mvn clean package`, the plugin ends up at `AreaShop/target/AreaShop.jar`.
+* **IntelliJ IDEA:** open the root `pom.xml` as a project, then run the `package` lifecycle goal of the
+  `AreaShop` module from the Maven tool window. Make sure the project SDK is a JDK 25.
+
+To drop the built jar straight into a test server, add `-DcopyResult="/path/to/server/plugins"`.
+
+Checkstyle runs as part of every build and fails it on a violation, the rules live in `config/checkstyle.xml`.
 
 ### Metrics
 This plugin uses [bStats](https://bstats.org), which means that the following information is collected and sent to bstats.org:

@@ -39,7 +39,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>25</maven.compiler.release>
-    <build.number>#CUSTOM</build.number>
+    <!-- Appended to the plugin version, filled in by CI to add a build number -->
+    <build.number/>
 
     <!-- Server and plugin API versions AreaShop is built against -->
     <paper.version>26.2.build.111-stable</paper.version>
@@ -47,7 +48,7 @@
     <worldguard.version>7.0.17</worldguard.version>
     <vault.version>1.7.1</vault.version>
     <bstats.version>3.2.1</bstats.version>
-    <junit.version>5.11.4</junit.version>
+    <junit.version>5.14.4</junit.version>
   </properties>
 
   <modules>
@@ -75,7 +76,8 @@
               <configLocation>config/checkstyle.xml</configLocation>
               <suppressionsLocation>config/checkstyle-suppressions.xml</suppressionsLocation>
               <suppressionsFileExpression>config/checkstyle.suppressions.file</suppressionsFileExpression>
-              <encoding>UTF-8</encoding>
+              <inputEncoding>UTF-8</inputEncoding>
+              <outputEncoding>UTF-8</outputEncoding>
               <consoleOutput>true</consoleOutput>
               <failsOnError>true</failsOnError>
               <violationSeverity>error</violationSeverity>
