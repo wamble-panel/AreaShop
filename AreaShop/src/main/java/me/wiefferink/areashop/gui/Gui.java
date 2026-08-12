@@ -1,0 +1,158 @@
+package me.wiefferink.areashop.gui;
+
+import me.wiefferink.areashop.AreaShop;
+import me.wiefferink.areashop.messages.Message;
+import me.wiefferink.areashop.tools.Utils;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
+/**
+ * Base for the menus AreaShop shows.
+ *
+ * <p>A menu owns its inventory, which is how {@link GuiListener} recognizes it: there is no matching
+ * on titles, so another plugin opening a chest with the same name can never be mistaken for one of
+ * these.
+ */
+public abstract class Gui implements InventoryHolder {
+
+	/** Slots in a row of a chest inventory. */
+	public static final int ROW = 9;
+
+	protected final AreaShop plugin = AreaShop.getInstance();
+	protected final Player player;
+
+	/** What to do when a slot is clicked, empty for slots that do nothing. */
+	private final Map<Integer, Consumer<ClickType>> handlers = new HashMap<>();
+
+	private Inventory inventory;
+
+	protected Gui(Player player) {
+		this.player = player;
+	}
+
+	/**
+	 * The title shown at the top of the menu.
+	 * @return The title
+	 */
+	protected abstract Component title();
+
+	/**
+	 * How many rows of nine slots the menu has.
+	 * @return Number of rows, between 1 and 6
+	 */
+	protected abstract int rows();
+
+	/**
+	 * Fill the menu with items, called again whenever the menu is refreshed.
+	 */
+	protected abstract void build();
+
+	@Override
+	public Inventory getInventory() {
+		return inventory;
+	}
+
+	/**
+	 * Show this menu to the player.
+	 */
+	public void open() {
+		inventory = Bukkit.createInventory(this, Math.max(1, Math.min(6, rows())) * ROW, title());
+		build();
+		player.openInventory(inventory);
+	}
+
+	/**
+	 * Build the menu again, for when something it shows has changed.
+	 *
+	 * <p>Keeps the same inventory open, so the menu does not flicker and the player does not lose
+	 * their place.
+	 */
+	public void refresh() {
+		if(inventory == null) {
+			open();
+			return;
+		}
+		handlers.clear();
+		inventory.clear();
+		build();
+	}
+
+	/**
+	 * Put an item in the menu that does nothing when clicked.
+	 * @param slot The slot to put it in
+	 * @param item The item to show
+	 */
+	protected void set(int slot, ItemStack item) {
+		set(slot, item, null);
+	}
+
+	/**
+	 * Put an item in the menu.
+	 * @param slot    The slot to put it in
+	 * @param item    The item to show
+	 * @param onClick What to do when it is clicked, null for nothing
+	 */
+	protected void set(int slot, ItemStack item, Consumer<ClickType> onClick) {
+		if(slot < 0 || slot >= inventory.getSize()) {
+			return;
+		}
+		inventory.setItem(slot, item);
+		if(onClick != null) {
+			handlers.put(slot, onClick);
+		}
+	}
+
+	/**
+	 * Fill every empty slot of a row with the background item.
+	 * @param row The row to fill, starting at 0
+	 */
+	protected void fillRow(int row) {
+		ItemStack filler = Icon.of(Material.GRAY_STAINED_GLASS_PANE).name(Message.fromString(" ")).build();
+		for(int slot = row * ROW; slot < (row + 1) * ROW && slot < inventory.getSize(); slot++) {
+			if(inventory.getItem(slot) == null) {
+				set(slot, filler);
+			}
+		}
+	}
+
+	/**
+	 * Handle a click on one of the slots of this menu.
+	 * @param slot      The slot that was clicked
+	 * @param clickType How it was clicked
+	 */
+	void handleClick(int slot, ClickType clickType) {
+		Consumer<ClickType> handler = handlers.get(slot);
+		if(handler == null) {
+			return;
+		}
+		try {
+			handler.accept(clickType);
+		} catch(RuntimeException e) {
+			AreaShop.warn("Menu click of", player.getName(), "failed:", Utils.getStackTrace(e));
+			player.closeInventory();
+		}
+	}
+
+	/**
+	 * Close this menu and run a command as the player.
+	 *
+	 * <p>Going through the command means the menu can never skip a permission check, a limit or a
+	 * confirmation, all of that keeps living in one place.
+	 *
+	 * @param command The command to run, without the leading slash
+	 */
+	protected void runCommand(String command) {
+		player.closeInventory();
+		player.performCommand(command);
+	}
+}

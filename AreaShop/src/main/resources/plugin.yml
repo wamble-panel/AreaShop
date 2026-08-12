@@ -57,6 +57,8 @@ permissions:
       areashop.stack: true
       areashop.setlandlord: true
       areashop.setname: true
+      areashop.panel: true
+      areashop.panel.settings: true
       areashop.linksigns: true
       areashop.message: true
       areashop.import: true
@@ -221,6 +223,12 @@ permissions:
     default: op
   areashop.me:
     description: Allows you to get information about your regions
+    default: true
+  areashop.panel:
+    description: Allows you to open the shop panel with /as panel
+    default: true
+  areashop.panel.settings:
+    description: Allows you to change the settings of your own shops from the panel
     default: true
   areashop.setownerrent:
     description: Allows you to set the owner of rent regions

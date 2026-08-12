@@ -6,12 +6,15 @@ import com.sk89q.worldguard.protection.flags.RegionGroupFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import me.wiefferink.areashop.AreaShop;
 import me.wiefferink.areashop.events.notify.UpdateRegionEvent;
+import me.wiefferink.areashop.gui.PanelFlag;
 import me.wiefferink.areashop.interfaces.RegionAccessSet;
 import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.messages.Message;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.event.EventHandler;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -54,6 +57,9 @@ public class WorldGuardRegionFlagsFeature extends RegionFeature {
 		if(stateFlags != null) {
 			result &= updateRegionFlags(region, stateFlags);
 		}
+
+		// Last, so what the owner of the region picked in the panel wins from the profile
+		result &= applyPanelFlags(region);
 
 		return result;
 	}
@@ -174,6 +180,39 @@ public class WorldGuardRegionFlagsFeature extends RegionFeature {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Apply the settings the owner of a region picked in the panel.
+	 *
+	 * <p>These are applied after the flag profile, because the profile is reapplied on every update
+	 * of the region and would otherwise undo the choice made in the panel.
+	 *
+	 * @param region The region to apply the settings of
+	 * @return true if the flags have been set correctly, otherwise false
+	 */
+	public boolean applyPanelFlags(GeneralRegion region) {
+		ConfigurationSection chosen = region.getConfig().getConfigurationSection(PanelFlag.SETTING_PATH);
+		if(chosen == null) {
+			return true;
+		}
+
+		// Collect the flags of every setting into one section, reusing the regular flag handling
+		MemoryConfiguration flags = new MemoryConfiguration();
+		for(PanelFlag panelFlag : PanelFlag.all()) {
+			PanelFlag.Option option = panelFlag.getCurrent(region);
+			if(option == null || chosen.getString(panelFlag.getKey()) == null) {
+				continue;
+			}
+			for(Map.Entry<String, String> flag : option.flags().entrySet()) {
+				flags.set(flag.getKey(), flag.getValue());
+			}
+		}
+
+		if(flags.getKeys(false).isEmpty()) {
+			return true;
+		}
+		return updateRegionFlags(region, flags);
 	}
 
 	/**

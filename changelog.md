@@ -11,6 +11,23 @@ requirements below before updating.
 * **WorldGuard 7.0.17+** and **WorldEdit 7.4.4+**
 
 **Features:**
+* A shop panel: `/as panel` opens a menu with every region a player rents or owns, and from there
+  they manage one shop at a time. Per shop they can teleport to it, extend the rent, stop renting or
+  sell it, put it up for resale, and see its price, time left and state at a glance.
+  * **Access**: a menu of player heads showing who may build in the shop, click a head to take access
+    away, and pick from the online players to give it. `/as addfriend` still works for players who
+    are offline.
+  * **Settings**: who may enter, whether fighting is allowed, whether monsters spawn and who may open
+    the containers. These map onto WorldGuard flags, but only the ones the server owner offers in the
+    new `panelFlags` section of `hiddenConfig.yml`, so a player can never reach a flag that was not
+    put in front of them. Each setting can carry its own permission.
+  * Choices made in the panel are stored on the region and reapplied after the flag profile, so a
+    region update no longer undoes them.
+  * Everything that costs or returns money runs the matching command instead of doing the work
+    itself, so limits, permissions, economy handling and confirmations all keep behaving exactly as
+    they do in chat.
+  * The menus are built from the language files like every other message, colors, hex colors and all,
+    so they can be translated and restyled without touching the code.
 * Shop names: `/as setname <region> <name>` sets the name a region is shown under, available as
   `%shopname%` in messages, on signs and in region flags. Meant for marketplace servers where a
   region id like `market_47` means nothing to a player. Only an administrator can set it, the player

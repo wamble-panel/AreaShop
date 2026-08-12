@@ -19,6 +19,7 @@ import me.wiefferink.areashop.commands.InfoCommand;
 import me.wiefferink.areashop.commands.LinksignsCommand;
 import me.wiefferink.areashop.commands.MeCommand;
 import me.wiefferink.areashop.commands.MessageCommand;
+import me.wiefferink.areashop.commands.PanelCommand;
 import me.wiefferink.areashop.commands.ReloadCommand;
 import me.wiefferink.areashop.commands.RentCommand;
 import me.wiefferink.areashop.commands.ResellCommand;
@@ -59,6 +60,7 @@ public class CommandManager extends Manager implements CommandExecutor, TabCompl
 		commands.add(new BuyCommand());
 		commands.add(new SellCommand());
 		commands.add(new MeCommand());
+		commands.add(new PanelCommand());
 		commands.add(new InfoCommand());
 		commands.add(new TeleportCommand());
 		commands.add(new SetteleportCommand());

@@ -45,6 +45,73 @@ adding:
 # ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 # │ OTHER: All other settings.                                                                                                 │
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+# ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+# │ PANEL: The settings players can change for their own region from '/as panel'.                                              │
+# └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+# Each entry becomes one item in the settings menu, and clicking it moves to the next option.
+# The flag values use the same notation as the 'flagProfiles' section: a value, optionally followed
+# by 'g:<group>' to set the group of the flag, and an empty value clears the flag again.
+# Only flags listed here can ever be changed by a player, so leave out anything you do not want them to touch.
+# Add 'permission: some.permission' to an entry to limit who may change it.
+# These are applied after the flag profile of the region, so they are not lost when the region updates.
+panelFlags:
+  # Who may walk into the region.
+  entry:
+    item: OAK_DOOR
+    name: '&e&lWho can enter'
+    description: '&7Choose who may walk into your shop.'
+    options:
+      everyone:
+        name: '&aEveryone'
+        flags:
+          entry: ''
+      friends:
+        name: '&eOnly you and the players you gave access'
+        flags:
+          entry: 'deny g:nonmembers'
+  # Whether players can fight inside the region.
+  pvp:
+    item: IRON_SWORD
+    name: '&e&lFighting'
+    description: '&7Allow or block fighting in your shop.'
+    options:
+      off:
+        name: '&aNo fighting'
+        flags:
+          pvp: 'deny'
+      on:
+        name: '&cFighting allowed'
+        flags:
+          pvp: 'allow'
+  # Whether monsters can spawn inside the region.
+  mobs:
+    item: ZOMBIE_HEAD
+    name: '&e&lMonsters'
+    description: '&7Keep monsters out of your shop.'
+    options:
+      off:
+        name: '&aNo monsters'
+        flags:
+          mob-spawning: 'deny'
+      on:
+        name: '&cMonsters can spawn'
+        flags:
+          mob-spawning: 'allow'
+  # Whether visitors may open your chests.
+  chests:
+    item: CHEST
+    name: '&e&lChest access'
+    description: '&7Choose who may open the containers in your shop.'
+    options:
+      friends:
+        name: '&aOnly you and the players you gave access'
+        flags:
+          chest-access: 'deny g:nonmembers'
+      everyone:
+        name: '&cEveryone'
+        flags:
+          chest-access: 'allow'
+
 # How many visible characters the name set with '/as setname' may have (color codes do not count).
 shopNameMaxLength: 64
 # Service id of AreaShop on https://bstats.org, only change this when you run a fork with its own statistics page.

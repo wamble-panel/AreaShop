@@ -5,6 +5,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import me.wiefferink.areashop.handlers.BukkitHandler;
 import me.wiefferink.areashop.handlers.WorldEditHandler;
+import me.wiefferink.areashop.gui.GuiListener;
 import me.wiefferink.areashop.handlers.WorldGuardHandler;
 import me.wiefferink.areashop.listeners.PlayerLoginLogoutListener;
 import me.wiefferink.areashop.managers.CommandManager;
@@ -200,6 +201,7 @@ public final class AreaShop extends JavaPlugin {
 
 			// Register the event listeners
 			getServer().getPluginManager().registerEvents(new PlayerLoginLogoutListener(this), this);
+			getServer().getPluginManager().registerEvents(new GuiListener(), this);
 
 			setupTasks();
 
