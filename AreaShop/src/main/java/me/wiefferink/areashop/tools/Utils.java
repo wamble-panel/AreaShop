@@ -10,6 +10,8 @@ import me.wiefferink.areashop.regions.RentRegion;
 import me.wiefferink.areashop.messages.Colors;
 import me.wiefferink.areashop.messages.Log;
 import me.wiefferink.areashop.messages.Message;
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -868,6 +870,36 @@ public class Utils {
 			return online;
 		}
 		return Bukkit.getOfflinePlayerIfCached(name);
+	}
+
+	/**
+	 * Pay a player, working from whatever is known about them.
+	 *
+	 * <p>Vault can take a name instead of a player, but that way of paying is deprecated and goes
+	 * wrong on economy plugins that key their accounts on uuid: the money lands in a fresh account
+	 * that nobody owns. This resolves the name through the players the server knows instead, and
+	 * reports that nobody was paid when it cannot.
+	 *
+	 * @param player The player to pay, may be null when only a name is known
+	 * @param name   The name to fall back on, may be null
+	 * @param world  The world to pay in, for economies that keep a balance per world
+	 * @param amount How much to pay
+	 * @return The response of the economy, or null when there is nobody to pay
+	 */
+	public static EconomyResponse depositPlayer(OfflinePlayer player, String name, String world, double amount) {
+		OfflinePlayer target = player;
+		if(target == null || target.getName() == null) {
+			OfflinePlayer found = findOfflinePlayer(name);
+			if(found != null) {
+				target = found;
+			}
+		}
+		if(target == null) {
+			return null;
+		}
+
+		Economy economy = AreaShop.getInstance().getEconomy();
+		return economy == null ? null : economy.depositPlayer(target, world, amount);
 	}
 
 	/**

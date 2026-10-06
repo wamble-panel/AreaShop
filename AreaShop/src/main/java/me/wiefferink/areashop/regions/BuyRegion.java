@@ -366,11 +366,9 @@ public class BuyRegion extends GeneralRegion {
 			r = null;
 			OfflinePlayer oldOwnerPlayer = Bukkit.getOfflinePlayer(oldOwner);
 			String oldOwnerName = getPlayerName();
+			r = Utils.depositPlayer(oldOwnerPlayer, oldOwnerName, getWorldName(), getResellPrice());
 			if(oldOwnerPlayer != null && oldOwnerPlayer.getName() != null) {
-				r = plugin.getEconomy().depositPlayer(oldOwnerPlayer, getWorldName(), getResellPrice());
 				oldOwnerName = oldOwnerPlayer.getName();
-			} else if(oldOwnerName != null) {
-				r = plugin.getEconomy().depositPlayer(oldOwnerName, getWorldName(), getResellPrice());
 			}
 			if(r == null || !r.transactionSuccess()) {
 				AreaShop.warn("Something went wrong with paying '" + oldOwnerName + "' " + getFormattedPrice() + " for his resell of region " + getName() + " to " + offlinePlayer.getName());
@@ -416,11 +414,7 @@ public class BuyRegion extends GeneralRegion {
 			}
 			String landlordName = getLandlordName();
 			if(landlordName != null) {
-				if(landlordPlayer != null && landlordPlayer.getName() != null) {
-					r = plugin.getEconomy().depositPlayer(landlordPlayer, getWorldName(), getPrice());
-				} else {
-					r = plugin.getEconomy().depositPlayer(landlordName, getWorldName(), getPrice());
-				}
+				r = Utils.depositPlayer(landlordPlayer, landlordName, getWorldName(), getPrice());
 				if(r != null && !r.transactionSuccess()) {
 					AreaShop.warn("Something went wrong with paying '" + landlordName + "' " + getFormattedPrice() + " for his sell of region " + getName() + " to " + offlinePlayer.getName());
 				}
@@ -509,11 +503,7 @@ public class BuyRegion extends GeneralRegion {
 				EconomyResponse response = null;
 				boolean error = false;
 				try {
-					if(player.getName() != null) {
-						response = plugin.getEconomy().depositPlayer(player, getWorldName(), moneyBack);
-					} else if(getPlayerName() != null) {
-						response = plugin.getEconomy().depositPlayer(getPlayerName(), getWorldName(), moneyBack);
-					}
+					response = Utils.depositPlayer(player, getPlayerName(), getWorldName(), moneyBack);
 				} catch(Exception e) {
 					error = true;
 				}
@@ -551,10 +541,10 @@ public class BuyRegion extends GeneralRegion {
 			return false;
 		}
 		long lastPlayed = getLastActiveTime();
-		//AreaShop.debug("currentTime=" + Calendar.getInstance().getTimeInMillis() + ", getLastPlayed()=" + lastPlayed + ", timeInactive=" + (Calendar.getInstance().getTimeInMillis()-player.getLastPlayed()) + ", inactiveSetting=" + inactiveSetting);
+		//AreaShop.debug("currentTime=" + Calendar.getInstance().getTimeInMillis() + ", getLastPlayed()=" + lastPlayed + ", timeInactive=" + (Calendar.getInstance().getTimeInMillis()-player.getLastSeen()) + ", inactiveSetting=" + inactiveSetting);
 		if(Calendar.getInstance().getTimeInMillis() > (lastPlayed + inactiveSetting)) {
 			AreaShop.info("Region " + getName() + " unrented because of inactivity for player " + getPlayerName());
-			AreaShop.debug("currentTime=" + Calendar.getInstance().getTimeInMillis() + ", getLastPlayed()=" + lastPlayed + ", timeInactive=" + (Calendar.getInstance().getTimeInMillis() - player.getLastPlayed()) + ", inactiveSetting=" + inactiveSetting);
+			AreaShop.debug("currentTime=" + Calendar.getInstance().getTimeInMillis() + ", getLastPlayed()=" + lastPlayed + ", timeInactive=" + (Calendar.getInstance().getTimeInMillis() - player.getLastSeen()) + ", inactiveSetting=" + inactiveSetting);
 			return this.sell(true, null);
 		}
 		return false;

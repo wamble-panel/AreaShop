@@ -571,11 +571,7 @@ public class RentRegion extends GeneralRegion {
 		}
 		String landlordName = getLandlordName();
 		if(landlordName != null) {
-			if(landlordPlayer != null && landlordPlayer.getName() != null) {
-				r = plugin.getEconomy().depositPlayer(landlordPlayer, getWorldName(), price);
-			} else {
-				r = plugin.getEconomy().depositPlayer(landlordName, getWorldName(), price);
-			}
+			r = Utils.depositPlayer(landlordPlayer, landlordName, getWorldName(), price);
 			if(r == null || !r.transactionSuccess()) {
 				AreaShop.warn("Something went wrong with paying '" + landlordName + "' " + Utils.formatCurrency(price) + " for his rent of region " + getName() + " to " + offlinePlayer.getName());
 			}
@@ -677,11 +673,7 @@ public class RentRegion extends GeneralRegion {
 				r = null;
 				boolean error = false;
 				try {
-					if(player.getName() != null) {
-						r = plugin.getEconomy().depositPlayer(player, getWorldName(), moneyBack);
-					} else if(getPlayerName() != null) {
-						r = plugin.getEconomy().depositPlayer(getPlayerName(), getWorldName(), moneyBack);
-					}
+					r = Utils.depositPlayer(player, getPlayerName(), getWorldName(), moneyBack);
 				} catch(Exception e) {
 					error = true;
 				}
@@ -721,10 +713,10 @@ public class RentRegion extends GeneralRegion {
 			return false;
 		}
 		long lastPlayed = getLastActiveTime();
-		//AreaShop.debug("currentTime=" + Calendar.getInstance().getTimeInMillis() + ", getLastPlayed()=" + lastPlayed + ", timeInactive=" + (Calendar.getInstance().getTimeInMillis()-player.getLastPlayed()) + ", inactiveSetting=" + inactiveSetting);
+		//AreaShop.debug("currentTime=" + Calendar.getInstance().getTimeInMillis() + ", getLastPlayed()=" + lastPlayed + ", timeInactive=" + (Calendar.getInstance().getTimeInMillis()-player.getLastSeen()) + ", inactiveSetting=" + inactiveSetting);
 		if(Calendar.getInstance().getTimeInMillis() > (lastPlayed + inactiveSetting)) {
 			AreaShop.info("Region " + getName() + " unrented because of inactivity for player " + getPlayerName());
-			AreaShop.debug("currentTime=" + Calendar.getInstance().getTimeInMillis() + ", getLastPlayed()=" + lastPlayed + ", timeInactive=" + (Calendar.getInstance().getTimeInMillis() - player.getLastPlayed()) + ", inactiveSetting=" + inactiveSetting);
+			AreaShop.debug("currentTime=" + Calendar.getInstance().getTimeInMillis() + ", getLastPlayed()=" + lastPlayed + ", timeInactive=" + (Calendar.getInstance().getTimeInMillis() - player.getLastSeen()) + ", inactiveSetting=" + inactiveSetting);
 			return this.unRent(true, null);
 		}
 		return false;
