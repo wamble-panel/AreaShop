@@ -587,6 +587,19 @@ public final class AreaShop extends JavaPlugin {
 			});
 		}
 
+		// Taking away sublet spots that have run out
+		long subletCheck = Utils.millisToTicks(Utils.getDurationFromMinutesOrString("sublet.delay"));
+		if(subletCheck > 0) {
+			Do.syncTimer(subletCheck, () -> {
+				if(isReady()) {
+					finalPlugin.getFileManager().checkSublets();
+					AreaShop.debugTask("Checking for sublet spots that have run out...");
+				} else {
+					AreaShop.debugTask("Skipped checking sublet spots, plugin not ready");
+				}
+			});
+		}
+
 		// Update all regions on startup
 		if(getConfig().getBoolean("updateRegionsOnStartup")) {
 			Do.syncLater(20, () -> {

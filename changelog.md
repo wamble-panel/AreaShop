@@ -11,6 +11,21 @@ requirements below before updating.
 * **WorldGuard 7.0.17+** and **WorldEdit 7.4.4+**
 
 **Features:**
+* Subletting: the player holding a region can rent space in it out to other players and keep the
+  money. They set a price and how long a spot lasts from `/as panel`, and anyone can browse what is
+  on offer with `/as sublet`. A subtenant gets build access until their time runs out, and paying
+  again before then adds to what is left rather than replacing it. Spots that run out are taken away
+  on their own and the player is told. Guarded by `areashop.sublet` to rent space out and
+  `areashop.subrent` to rent some, with a `sublet` section in the config for the limits and timing.
+* An in-game guide: `/as guide`, also reachable from the panel, explaining shops, renting, buying,
+  access, settings, market stalls, subletting, signs and the commands, one item per topic in plain
+  words. Written in small capitals with hex colors, and entirely in the language file so a server can
+  reword or restyle all of it.
+* Config files are brought up to date on startup. A plugin update that adds a setting now appends it
+  to `config.yml` and `default.yml` along with the comments that explain it, instead of leaving the
+  server owner with the file from whichever version they installed first. Existing settings are never
+  changed, moved or removed, a copy of the old file is kept next to it first, and the whole thing can
+  be switched off with `updateFilesOnStartup`.
 * VillagerMarket integration, for servers that run a marketplace with both plugins. It switches
   itself on when VillagerMarket is installed and stays out of the way when it is not.
   * When a region goes back on the market, the stalls standing in it are dealt with instead of
@@ -86,7 +101,7 @@ requirements below before updating.
   the language files is unchanged.
 * Replaced `json-simple` and `commons-lang`, neither of which the server ships anymore.
 * bStats updated from 1.1 to 3.2.1.
-* Added tests for the color, markup and price expression handling.
+* Added tests for the color, markup, price expression and config updating handling.
 
 ## AreaShop 2.6.0
 **Features:**

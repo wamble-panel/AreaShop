@@ -5,6 +5,7 @@ import me.wiefferink.areashop.features.CommandsFeature;
 import me.wiefferink.areashop.features.DebugFeature;
 import me.wiefferink.areashop.features.FriendsFeature;
 import me.wiefferink.areashop.features.RegionFeature;
+import me.wiefferink.areashop.features.SubletFeature;
 import me.wiefferink.areashop.features.TeleportFeature;
 import me.wiefferink.areashop.features.VillagerMarketFeature;
 import me.wiefferink.areashop.features.WorldGuardRegionFlagsFeature;
@@ -29,7 +30,8 @@ public class FeatureManager extends Manager {
 			WorldGuardRegionFlagsFeature.class,
 			TeleportFeature.class,
 			CommandsFeature.class,
-			VillagerMarketFeature.class
+			VillagerMarketFeature.class,
+			SubletFeature.class
 	));
 	// One instance of each feature, registered for event handling
 	private final Set<RegionFeature> globalFeatures;

@@ -37,6 +37,8 @@ AreaShop allows you selling and renting regions to players. It could be used to 
 * Messages that can be clicked for more information and actions ([language](https://github.com/NLthijs48/AreaShop/wiki/Language-support) can be changed, as well as click/hover actions).
 * Full RGB colors in messages and on signs, written as `&#FF00AA` or `[#FF00AA]`, next to the classic `&a` codes.
 * [VillagerMarket](https://www.spigotmc.org/resources/82965/) integration: shop stalls inside a region are handed back when it goes back on the market, and their owner can upgrade them from the panel.
+* Players can rent space in a region they hold out to others (`/as sublet`), keeping the money themselves.
+* An in-game guide (`/as guide`) explaining how everything works.
 * A shop panel (`/as panel`) where players manage the regions they rent or own: give and take access, change who may enter, and extend, sell or resell without typing a command.
 * ![region-information-message](https://cloud.githubusercontent.com/assets/6951068/21939161/bff2fe3c-d9be-11e6-802f-4a0bce073c64.png)
 * Change the  of the plugin or use of of the already provided language files (check [here](https://github.com/NLthijs48/AreaShop/tree/master/AreaShop/src/main/resources/lang))

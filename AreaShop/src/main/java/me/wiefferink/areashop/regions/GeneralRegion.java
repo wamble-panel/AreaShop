@@ -7,6 +7,7 @@ import me.wiefferink.areashop.events.NotifyRegionEvent;
 import me.wiefferink.areashop.events.notify.UpdateRegionEvent;
 import me.wiefferink.areashop.features.FriendsFeature;
 import me.wiefferink.areashop.features.RegionFeature;
+import me.wiefferink.areashop.features.SubletFeature;
 import me.wiefferink.areashop.features.TeleportFeature;
 import me.wiefferink.areashop.features.signs.SignsFeature;
 import me.wiefferink.areashop.interfaces.GeneralRegionInterface;
@@ -216,6 +217,14 @@ public abstract class GeneralRegion implements GeneralRegionInterface, Comparabl
 	 */
 	public TeleportFeature getTeleportFeature() {
 		return getFeature(TeleportFeature.class);
+	}
+
+	/**
+	 * Get the sublet feature, to rent space in this region out to other players.
+	 * @return The SubletFeature of this region
+	 */
+	public SubletFeature getSubletFeature() {
+		return getFeature(SubletFeature.class);
 	}
 
 	// ABSTRACT

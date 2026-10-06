@@ -94,6 +94,11 @@ public class ShopsGui extends Gui {
 			});
 		}
 
+		set(row + 2, Icon.of(Material.KNOWLEDGE_BOOK)
+				.name("panel-guideName")
+				.lore("panel-guideLore")
+				.build(), click -> new GuideGui(player, this).open());
+
 		set(row + 4, Icon.of(Material.BOOK)
 				.name("panel-pageStatus", page + 1, pages)
 				.lore("panel-shopCount", shops.size())

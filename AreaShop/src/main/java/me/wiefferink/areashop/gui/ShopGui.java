@@ -57,6 +57,7 @@ public class ShopGui extends Gui {
 		buildFriends();
 		buildSettings();
 		buildMarket();
+		buildSublet();
 		buildMoneyActions();
 		buildBack();
 	}
@@ -116,6 +117,21 @@ public class ShopGui extends Gui {
 				.name("panel-marketName")
 				.lore("panel-marketLore", stalls)
 				.build(), click -> new MarketGui(player, region, this).open());
+	}
+
+	/**
+	 * Add the button that opens the subletting menu, where the holder rents space in the region out
+	 * to other players.
+	 */
+	private void buildSublet() {
+		if(!player.hasPermission("areashop.sublet") || !plugin.getConfig().getBoolean("sublet.enabled", true)) {
+			return;
+		}
+		int tenants = region.getSubletFeature().countActiveTenants();
+		set(25, Icon.of(Material.GOLD_INGOT)
+				.name("panel-subletName")
+				.lore(region.getSubletFeature().isOffered() ? "panel-subletLoreOn" : "panel-subletLoreOff", tenants)
+				.build(), click -> new SubletGui(player, region, this).open());
 	}
 
 	/**

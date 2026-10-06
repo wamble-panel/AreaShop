@@ -15,6 +15,7 @@ import me.wiefferink.areashop.regions.GeneralRegion.RegionEvent;
 import me.wiefferink.areashop.regions.GeneralRegion.RegionType;
 import me.wiefferink.areashop.regions.RegionGroup;
 import me.wiefferink.areashop.regions.RentRegion;
+import me.wiefferink.areashop.tools.ConfigUpdater;
 import me.wiefferink.areashop.tools.Utils;
 import me.wiefferink.areashop.tools.Do;
 import org.bukkit.Bukkit;
@@ -662,6 +663,17 @@ public class FileManager extends Manager {
 	}
 
 	/**
+	 * Take away the spots in regions that players sublet, once their time has run out.
+	 */
+	public void checkSublets() {
+		Do.forAll(
+			plugin.getConfig().getInt("sublet.regionsPerTick"),
+			getRegions(),
+			region -> region.getSubletFeature().removeExpired()
+		);
+	}
+
+	/**
 	 * Check all regions and unrent/sell them if the player is inactive for too long.
 	 */
 	public void checkForInactiveRegions() {
@@ -764,6 +776,9 @@ public class FileManager extends Manager {
 				AreaShop.warn("Something went wrong saving the default region settings: " + defaultFile.getAbsolutePath());
 			}
 		}
+		// Bring over any settings that this version of the plugin added
+		updateFile(defaultFile, AreaShop.defaultFile);
+
 		// Load default.yml from the plugin folder, and as backup the default one
 		try(
 				InputStreamReader custom = new InputStreamReader(new FileInputStream(defaultFile), StandardCharsets.UTF_8);
@@ -804,6 +819,9 @@ public class FileManager extends Manager {
 				AreaShop.warn("Something went wrong saving the config file: " + configFile.getAbsolutePath());
 			}
 		}
+		// Bring over any settings that this version of the plugin added
+		updateFile(configFile, AreaShop.configFile);
+
 		// Load config.yml from the plugin folder
 		try(
 				InputStreamReader custom = new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8);
@@ -833,6 +851,27 @@ public class FileManager extends Manager {
 		}
 		Utils.initialize(config);
 		return result;
+	}
+
+	/**
+	 * Add settings that this version of the plugin brought along to a file the server already has.
+	 *
+	 * <p>Reads the switch straight out of config.yml rather than through {@link #getConfig()},
+	 * because this runs before the config has been loaded.
+	 *
+	 * @param file     The file on the server
+	 * @param resource Name of the matching file inside the plugin
+	 */
+	private void updateFile(File file, String resource) {
+		if(!file.exists()) {
+			return;
+		}
+		File configFile = new File(configPath);
+		if(configFile.exists()
+				&& !YamlConfiguration.loadConfiguration(configFile).getBoolean("updateFilesOnStartup", true)) {
+			return;
+		}
+		ConfigUpdater.update(plugin, file.toPath(), resource);
 	}
 
 	/**

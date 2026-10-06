@@ -60,6 +60,9 @@ permissions:
       areashop.panel: true
       areashop.panel.settings: true
       areashop.panel.market: true
+      areashop.guide: true
+      areashop.sublet: true
+      areashop.subrent: true
       areashop.linksigns: true
       areashop.message: true
       areashop.import: true
@@ -233,6 +236,15 @@ permissions:
     default: true
   areashop.panel.market:
     description: Allows you to see and upgrade the VillagerMarket stalls standing in your own regions
+    default: true
+  areashop.guide:
+    description: Allows you to open the guide that explains how everything works
+    default: true
+  areashop.sublet:
+    description: Allows you to rent space in a region you hold out to other players
+    default: true
+  areashop.subrent:
+    description: Allows you to rent space in a region from the player holding it
     default: true
   areashop.setownerrent:
     description: Allows you to set the owner of rent regions
