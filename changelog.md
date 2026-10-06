@@ -11,6 +11,20 @@ requirements below before updating.
 * **WorldGuard 7.0.17+** and **WorldEdit 7.4.4+**
 
 **Features:**
+* VillagerMarket integration, for servers that run a marketplace with both plugins. It switches
+  itself on when VillagerMarket is installed and stays out of the way when it is not.
+  * When a region goes back on the market, the stalls standing in it are dealt with instead of
+    being left owned by a player who is gone. `villagerMarket.onRelease` picks what happens:
+    `abandon` hands the stalls back the way VillagerMarket does when a rent runs out, `remove` does
+    that and then takes the villagers away as well, and `nothing` leaves them alone.
+  * Whichever is picked, the stalls are always handed back first, so the owner keeps their deposit,
+    their collected money and their stock, which waits for them in `/vm expiredstorage`. They are
+    told what happened and where to find it.
+  * This covers a rent running out, a region being unrented or sold back, and a region being
+    deleted. Admin shops and stalls nobody has claimed are never touched.
+  * Upgrades: from `/as panel` the owner of a region can make the stalls in it bigger, a row at a
+    time, for a price per row set in the config. Both the shopfront customers buy from and the
+    storage its owner stocks can be upgraded, each with its own maximum.
 * A shop panel: `/as panel` opens a menu with every region a player rents or owns, and from there
   they manage one shop at a time. Per shop they can teleport to it, extend the rent, stop renting or
   sell it, put it up for resale, and see its price, time left and state at a glance.

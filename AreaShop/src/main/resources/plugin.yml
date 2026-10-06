@@ -3,7 +3,7 @@ main: me.wiefferink.areashop.AreaShop
 version: "${project.version}${build.number}"
 description: "Selling and renting WorldGuard regions to your players, highly configurable."
 depend: [Vault, WorldGuard, WorldEdit]
-softdepend: [Multiverse-Core, FastAsyncWorldEdit]
+softdepend: [Multiverse-Core, FastAsyncWorldEdit, VillagerMarket]
 author: NLThijs48
 website: https://github.com/NLthijs48/AreaShop
 commands:
@@ -59,6 +59,7 @@ permissions:
       areashop.setname: true
       areashop.panel: true
       areashop.panel.settings: true
+      areashop.panel.market: true
       areashop.linksigns: true
       areashop.message: true
       areashop.import: true
@@ -229,6 +230,9 @@ permissions:
     default: true
   areashop.panel.settings:
     description: Allows you to change the settings of your own shops from the panel
+    default: true
+  areashop.panel.market:
+    description: Allows you to see and upgrade the VillagerMarket stalls standing in your own regions
     default: true
   areashop.setownerrent:
     description: Allows you to set the owner of rent regions

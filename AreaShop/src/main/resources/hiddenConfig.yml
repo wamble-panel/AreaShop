@@ -46,6 +46,38 @@ adding:
 # │ OTHER: All other settings.                                                                                                 │
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 # ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+# │ VILLAGERMARKET: Integration with the VillagerMarket plugin, used when it is installed.                                     │
+# └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+villagerMarket:
+  # What to do with the shop villagers standing in a region when it goes back on the market,
+  # which happens when a rent runs out, a region is unrented or sold back, or a region is deleted.
+  #   abandon: hand the shops back the way VillagerMarket does when a rent runs out. The owner gets
+  #            their deposit and collected money back and their stock goes to '/vm expiredstorage',
+  #            and the villager stays where it is for whoever rents the region next.
+  #   remove:  hand the shops back first, so nothing is lost, and then take the villagers away as
+  #            well, leaving the region empty.
+  #   nothing: leave the shops alone.
+  onRelease: abandon
+  # Whether shops owned by someone other than the player losing the region are cleared too.
+  # Leave this on for a marketplace, where the renter sublets stalls to other players.
+  # Shops without an owner and admin shops are never touched.
+  clearShopsOfOtherPlayers: true
+  # Letting the owner of a region make the stalls in it bigger from '/as panel'.
+  upgrades:
+    enabled: true
+    # The part customers buy from.
+    shopfront:
+      # Largest size a stall can be upgraded to, in slots. A row is 9 slots and 54 is a double chest.
+      maxSlots: 54
+      # What each extra row costs.
+      pricePerRow: 2500
+    # The part the owner of the stall stocks.
+    storage:
+      maxSlots: 54
+      pricePerRow: 2500
+
+
+# ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 # │ PANEL: The settings players can change for their own region from '/as panel'.                                              │
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 # Each entry becomes one item in the settings menu, and clicking it moves to the next option.

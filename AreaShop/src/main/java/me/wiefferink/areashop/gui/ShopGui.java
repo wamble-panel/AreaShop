@@ -1,5 +1,6 @@
 package me.wiefferink.areashop.gui;
 
+import me.wiefferink.areashop.integrations.VillagerMarketHook;
 import me.wiefferink.areashop.messages.Message;
 import me.wiefferink.areashop.regions.BuyRegion;
 import me.wiefferink.areashop.regions.GeneralRegion;
@@ -55,6 +56,7 @@ public class ShopGui extends Gui {
 		buildTeleport();
 		buildFriends();
 		buildSettings();
+		buildMarket();
 		buildMoneyActions();
 		buildBack();
 	}
@@ -96,6 +98,24 @@ public class ShopGui extends Gui {
 				.name("panel-settingsName")
 				.lore("panel-settingsLore")
 				.build(), click -> new FlagsGui(player, region, this).open());
+	}
+
+	/**
+	 * Add the button that opens the VillagerMarket stalls of the region, when that plugin is around
+	 * and there is anything standing in the region.
+	 */
+	private void buildMarket() {
+		if(!player.hasPermission("areashop.panel.market") || !VillagerMarketHook.getInstance().isAvailable()) {
+			return;
+		}
+		int stalls = VillagerMarketHook.getInstance().getShopsIn(region).size();
+		if(stalls == 0) {
+			return;
+		}
+		set(22, Icon.of(Material.VILLAGER_SPAWN_EGG)
+				.name("panel-marketName")
+				.lore("panel-marketLore", stalls)
+				.build(), click -> new MarketGui(player, region, this).open());
 	}
 
 	/**
