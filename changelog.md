@@ -23,10 +23,13 @@ requirements below before updating.
   words. Written in small capitals with hex colors, and entirely in the language file so a server can
   reword or restyle all of it.
 * Config files are brought up to date on startup. A plugin update that adds a setting now appends it
-  to `config.yml` and `default.yml` along with the comments that explain it, instead of leaving the
-  server owner with the file from whichever version they installed first. Existing settings are never
-  changed, moved or removed, a copy of the old file is kept next to it first, and the whole thing can
-  be switched off with `updateFilesOnStartup`.
+  to `config.yml` and `default.yml` along with the comments that explain it, and writes the version
+  the file was brought up to, instead of leaving the server owner with the file from whichever version
+  they installed first. Existing settings are never changed, moved or removed, a copy of the old file
+  is kept next to it first, and the whole thing can be switched off with `updateFilesOnStartup`.
+  The settings this release adds live in `config.yml` rather than `hiddenConfig.yml`, so they are
+  appended to the file a server already has and can be read and changed there: `shopNameMaxLength`,
+  `sublet`, `villagerMarket` and `panelFlags`.
 * VillagerMarket integration, for servers that run a marketplace with both plugins. It switches
   itself on when VillagerMarket is installed and stays out of the way when it is not.
   * When a region goes back on the market, the stalls standing in it are dealt with instead of
@@ -41,18 +44,34 @@ requirements below before updating.
   * Upgrades: from `/as panel` the owner of a region can make the stalls in it bigger, a row at a
     time, for a price per row set in the config. Both the shopfront customers buy from and the
     storage its owner stocks can be upgraded, each with its own maximum.
-* A shop panel: `/as panel` opens a menu with every region a player rents or owns, and from there
-  they manage one shop at a time. Per shop they can teleport to it, extend the rent, stop renting or
+* A shop panel: `/as panel` opens a menu with every shop a player has anything to do with, and from
+  there they manage one at a time. Per shop they can teleport to it, extend the rent, stop renting or
   sell it, put it up for resale, and see its price, time left and state at a glance.
+  * The list covers the shops a player holds, the one they rent from another player and the ones they
+    were given access to, each marked for what it is. Only the shops they hold themselves can be
+    changed; the others open read-only.
+  * **Find a shop**: the compass lists every shop nobody has yet, cheapest first, with a filter for
+    rentals, purchases or both, and a click rents or buys one. The gold bar next to it lists the shops
+    other players are renting out.
   * **Access**: a menu of player heads showing who may build in the shop, click a head to take access
     away, and pick from the online players to give it. `/as addfriend` still works for players who
     are offline.
-  * **Settings**: who may enter, whether fighting is allowed, whether monsters spawn and who may open
-    the containers. These map onto WorldGuard flags, but only the ones the server owner offers in the
-    new `panelFlags` section of `hiddenConfig.yml`, so a player can never reach a flag that was not
-    put in front of them. Each setting can carry its own permission.
+  * **Settings**: who may enter, whether fighting is allowed, whether monsters spawn, whether visitors
+    may build and who may open the containers, plus a greeting message at the door. These map onto
+    WorldGuard flags, but only the ones the server owner offers in the `panelFlags` section of
+    `config.yml`, so a player can never reach a flag that was not put in front of them. Each setting
+    can carry its own permission.
   * Choices made in the panel are stored on the region and reapplied after the flag profile, so a
     region update no longer undoes them.
+  * **Shop name**: staff with `areashop.setname` get a name tag in the panel that fills `/as setname`
+    in for them, so renaming a shop no longer means typing out the region id.
+  * Staff with the new `areashop.panel.others` permission can open the panel of a shop they do not
+    hold, and `/as panel <player>` lists what someone else holds, so they can help without taking
+    the shop over first.
+  * The list is read again every time the menu is drawn, so a shop that was just unrented, handed
+    over or deleted stops showing up without reopening anything.
+  * The menus are laid out in small capitals with the same hex palette as the guide, and every name
+    and line of lore lives in the language file, so a server can restyle all of it.
   * Everything that costs or returns money runs the matching command instead of doing the work
     itself, so limits, permissions, economy handling and confirmations all keep behaving exactly as
     they do in chat.

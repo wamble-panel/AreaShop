@@ -12,7 +12,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 /**
- * The menu for one shop, with everything its owner can do to it.
+ * The menu for one shop, with everything its holder can do to it.
+ *
+ * <p>Laid out in three bands: the shop itself at the top, the buttons that change nothing but what
+ * the shop is like in the middle, and the ones that cost or return money below them. Players that
+ * only have access to a shop, rather than holding it, get the top band and the way in.
  */
 public class ShopGui extends Gui {
 
@@ -38,30 +42,55 @@ public class ShopGui extends Gui {
 
 	@Override
 	protected int rows() {
-		return 5;
+		return 6;
 	}
 
 	@Override
 	protected void build() {
-		// The region is gone or was taken over while the menu was open
-		if(region.isDeleted() || !region.isOwner(player)) {
+		// The shop is gone or was taken over while the menu was open
+		if(!maySee(region)) {
 			set(22, Icon.of(Material.BARRIER).name("panel-shopGoneName").lore("panel-shopGoneLore").build());
-			buildBack();
+			setBack(49, parent);
+			fillRest();
 			return;
 		}
 
-		set(4, Icon.of(Material.WRITABLE_BOOK)
-				.name("panel-shopName", region)
-				.lore("panel-shopLore", region)
-				.build());
-
+		buildHeader();
 		buildTeleport();
-		buildFriends();
-		buildSettings();
-		buildMarket();
-		buildSublet();
-		buildMoneyActions();
-		buildBack();
+
+		if(mayManage(region)) {
+			buildFriends();
+			buildSettings();
+			buildMarket();
+			buildSublet();
+			buildName();
+			buildMoneyActions();
+		} else {
+			set(22, Icon.of(Material.PAPER)
+					.name("panel-viewOnlyName")
+					.lore("panel-viewOnlyLore")
+					.build());
+		}
+
+		setBack(49, parent);
+		fillRest();
+	}
+
+	/**
+	 * Add the book at the top that describes the shop.
+	 */
+	private void buildHeader() {
+		Icon icon = Icon.of(Material.WRITABLE_BOOK)
+				.name("panel-shopName", region)
+				.lore("panel-shopLore", region);
+
+		SubletFeature sublet = region.getSubletFeature();
+		if(sublet.isRentedOut()) {
+			icon.blank().lore("panel-shopRentedOut", SubletFeature.nameOf(sublet.getTenant()),
+					Utils.millisToHumanFormat(sublet.getTimeLeft()));
+		}
+
+		set(4, icon.build());
 	}
 
 	/**
@@ -122,8 +151,8 @@ public class ShopGui extends Gui {
 	}
 
 	/**
-	 * Add the button that opens the subletting menu, where the holder rents space in the region out
-	 * to other players.
+	 * Add the button that opens the subletting menu, where the holder rents the whole shop out to
+	 * another player.
 	 */
 	private void buildSublet() {
 		if(!player.hasPermission("areashop.sublet") || !plugin.getConfig().getBoolean("sublet.enabled", true)) {
@@ -138,10 +167,26 @@ public class ShopGui extends Gui {
 		} else {
 			lore = "panel-subletLoreOff";
 		}
-		set(25, Icon.of(Material.GOLD_INGOT)
+		set(23, Icon.of(Material.GOLD_INGOT)
 				.name("panel-subletName")
 				.lore(lore, SubletFeature.nameOf(sublet.getTenant()), Utils.millisToHumanFormat(sublet.getTimeLeft()))
 				.build(), click -> new SubletGui(player, region, this).open());
+	}
+
+	/**
+	 * Add the button that renames the shop, which only the staff that may use '/as setname' get.
+	 */
+	private void buildName() {
+		if(!player.hasPermission("areashop.setname")) {
+			return;
+		}
+		Icon icon = Icon.of(Material.NAME_TAG)
+				.name("panel-nameName")
+				.lore(region.hasDisplayName() ? "panel-nameLoreSet" : "panel-nameLoreUnset", region);
+		set(24, icon.build(), click -> {
+			player.closeInventory();
+			plugin.message(player, "panel-namePrompt", region);
+		});
 	}
 
 	/**
@@ -151,13 +196,13 @@ public class ShopGui extends Gui {
 	private void buildMoneyActions() {
 		if(region instanceof RentRegion rent) {
 			if(rent.isRented() && player.hasPermission("areashop.rent")) {
-				set(23, Icon.of(Material.CLOCK)
+				set(30, Icon.of(Material.CLOCK)
 						.name("panel-extendName")
 						.lore("panel-extendLore", rent)
 						.build(), click -> runCommand("areashop rent " + region.getName()));
 			}
 			if(rent.isRented() && player.hasPermission("areashop.unrentown")) {
-				set(24, Icon.of(Material.BARRIER)
+				set(32, Icon.of(Material.BARRIER)
 						.name("panel-unrentName")
 						.lore("panel-unrentLore", rent)
 						.build(), click -> runCommand("areashop unrent " + region.getName()));
@@ -168,7 +213,7 @@ public class ShopGui extends Gui {
 		if(region instanceof BuyRegion buy && buy.isSold()) {
 			if(buy.isInResellingMode()) {
 				if(player.hasPermission("areashop.stopresell")) {
-					set(23, Icon.of(Material.GOLD_INGOT)
+					set(30, Icon.of(Material.GOLD_INGOT)
 							.name("panel-stopResellName")
 							.lore("panel-stopResellLore", buy)
 							.build(), click -> runCommand("areashop stopresell " + region.getName()));
@@ -176,7 +221,7 @@ public class ShopGui extends Gui {
 			} else if(player.hasPermission("areashop.resell")) {
 				// Reselling needs a price, which a menu cannot ask for, so the command is offered
 				// in chat with everything but the number already filled in
-				set(23, Icon.of(Material.GOLD_INGOT)
+				set(30, Icon.of(Material.GOLD_INGOT)
 						.name("panel-resellName")
 						.lore("panel-resellLore", buy)
 						.build(), click -> {
@@ -186,22 +231,11 @@ public class ShopGui extends Gui {
 			}
 
 			if(player.hasPermission("areashop.sellown")) {
-				set(24, Icon.of(Material.BARRIER)
+				set(32, Icon.of(Material.BARRIER)
 						.name("panel-sellName")
 						.lore("panel-sellLore", buy)
 						.build(), click -> runCommand("areashop sell " + region.getName()));
 			}
 		}
-	}
-
-	/**
-	 * Add the button that goes back to the list of shops.
-	 */
-	private void buildBack() {
-		if(parent == null) {
-			return;
-		}
-		set(40, Icon.of(Material.ARROW).name("panel-back").build(), click -> parent.open());
-		fillRow(4);
 	}
 }

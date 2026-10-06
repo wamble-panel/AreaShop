@@ -2,6 +2,7 @@ package me.wiefferink.areashop.gui;
 
 import me.wiefferink.areashop.AreaShop;
 import me.wiefferink.areashop.messages.Message;
+import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.tools.Utils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -117,12 +118,80 @@ public abstract class Gui implements InventoryHolder {
 	 * @param row The row to fill, starting at 0
 	 */
 	protected void fillRow(int row) {
-		ItemStack filler = Icon.of(Material.GRAY_STAINED_GLASS_PANE).name(Message.fromString(" ")).build();
+		ItemStack filler = filler();
 		for(int slot = row * ROW; slot < (row + 1) * ROW && slot < inventory.getSize(); slot++) {
 			if(inventory.getItem(slot) == null) {
 				set(slot, filler);
 			}
 		}
+	}
+
+	/**
+	 * Fill every empty slot of the menu with the background item.
+	 *
+	 * <p>Called at the end of building a menu whose buttons do not fill it, so the player sees a tidy
+	 * panel instead of holes they can drop items into.
+	 */
+	protected void fillRest() {
+		ItemStack filler = filler();
+		for(int slot = 0; slot < inventory.getSize(); slot++) {
+			if(inventory.getItem(slot) == null) {
+				set(slot, filler);
+			}
+		}
+	}
+
+	/**
+	 * The item put in the slots that are not buttons.
+	 * @return The background item
+	 */
+	private static ItemStack filler() {
+		return Icon.of(Material.GRAY_STAINED_GLASS_PANE).name(Message.fromString(" ")).build();
+	}
+
+	/**
+	 * Put the button that goes back to the menu that opened this one, or closes it when there is none.
+	 * @param slot   The slot to put it in
+	 * @param parent The menu to go back to, may be null
+	 */
+	protected void setBack(int slot, Gui parent) {
+		if(parent == null) {
+			set(slot, Icon.of(Material.BARRIER).name("panel-close").build(), click -> player.closeInventory());
+			return;
+		}
+		set(slot, Icon.of(Material.ARROW).name("panel-back").build(), click -> parent.open());
+	}
+
+	/**
+	 * Check if the player may change anything about a region from the panel.
+	 *
+	 * <p>That is its holder, and staff that were given {@code areashop.panel.others} so they can help
+	 * a player out without having to take their shop over first.
+	 *
+	 * @param region The region to check
+	 * @return true when the player may manage it
+	 */
+	protected boolean mayManage(GeneralRegion region) {
+		return !region.isDeleted()
+				&& (region.isOwner(player) || player.hasPermission("areashop.panel.others"));
+	}
+
+	/**
+	 * Check if the player may look at a region in the panel without changing it.
+	 *
+	 * <p>Besides whoever manages it, that is the player currently renting it from its holder and
+	 * anyone that was given access to build in it.
+	 *
+	 * @param region The region to check
+	 * @return true when the region should show up for the player
+	 */
+	protected boolean maySee(GeneralRegion region) {
+		if(region.isDeleted()) {
+			return false;
+		}
+		return mayManage(region)
+				|| region.getSubletFeature().isTenant(player.getUniqueId())
+				|| region.getFriendsFeature().getFriends().contains(player.getUniqueId());
 	}
 
 	/**

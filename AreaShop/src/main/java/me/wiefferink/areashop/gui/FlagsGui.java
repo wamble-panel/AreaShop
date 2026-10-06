@@ -44,7 +44,7 @@ public class FlagsGui extends Gui {
 
 	@Override
 	protected void build() {
-		if(region.isDeleted() || !region.isOwner(player)) {
+		if(!mayManage(region)) {
 			set(22, Icon.of(Material.BARRIER).name("panel-shopGoneName").lore("panel-shopGoneLore").build());
 			buildBack();
 			return;
@@ -110,10 +110,7 @@ public class FlagsGui extends Gui {
 	 * Add the button that goes back to the shop menu.
 	 */
 	private void buildBack() {
-		if(parent == null) {
-			return;
-		}
-		set(40, Icon.of(Material.ARROW).name("panel-back").build(), click -> parent.open());
-		fillRow(4);
+		setBack(40, parent);
+		fillRest();
 	}
 }

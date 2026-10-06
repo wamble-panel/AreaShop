@@ -56,7 +56,7 @@ public class MarketShopGui extends Gui {
 
 	@Override
 	protected void build() {
-		if(region.isDeleted() || !region.isOwner(player)) {
+		if(!mayManage(region)) {
 			set(13, Icon.of(Material.BARRIER).name("panel-shopGoneName").lore("panel-shopGoneLore").build());
 			buildBack();
 			return;
@@ -171,11 +171,8 @@ public class MarketShopGui extends Gui {
 	 * Add the button that goes back to the list of stalls.
 	 */
 	private void buildBack() {
-		if(parent == null) {
-			return;
-		}
-		set(22, Icon.of(Material.ARROW).name("panel-back").build(), click -> parent.open());
-		fillRow(2);
+		setBack(22, parent);
+		fillRest();
 	}
 
 	/**

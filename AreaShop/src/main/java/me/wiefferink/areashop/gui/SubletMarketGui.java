@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * The menu listing the regions whose holder is renting space in them out.
+ * The menu listing the shops whose holder is renting the whole of them out to another player.
  */
 public class SubletMarketGui extends Gui {
 
@@ -24,10 +24,27 @@ public class SubletMarketGui extends Gui {
 	/** How many offers fit on one page. */
 	private static final int PAGE_SIZE = OFFER_ROWS * ROW;
 
+	private final Gui parent;
+
+	private List<GeneralRegion> offers = List.of();
 	private int page;
 
+	/**
+	 * Construct the list of shops players are renting out.
+	 * @param player The player looking at it
+	 */
 	public SubletMarketGui(Player player) {
+		this(player, null);
+	}
+
+	/**
+	 * Construct the list of shops players are renting out.
+	 * @param player The player looking at it
+	 * @param parent The menu to go back to, may be null
+	 */
+	public SubletMarketGui(Player player, Gui parent) {
 		super(player);
+		this.parent = parent;
 	}
 
 	@Override
@@ -42,7 +59,7 @@ public class SubletMarketGui extends Gui {
 
 	@Override
 	protected void build() {
-		List<GeneralRegion> offers = findOffers();
+		offers = findOffers();
 		int pages = Math.max(1, (offers.size() + PAGE_SIZE - 1) / PAGE_SIZE);
 		page = Math.max(0, Math.min(page, pages - 1));
 
@@ -63,8 +80,8 @@ public class SubletMarketGui extends Gui {
 	}
 
 	/**
-	 * Find the regions that are renting space out to others right now.
-	 * @return The regions offering space, the ones the player already rents space in first
+	 * Find the shops that are up for rent from their holder right now.
+	 * @return The shops on offer, cheapest first, including the one the player already rents
 	 */
 	private List<GeneralRegion> findOffers() {
 		List<GeneralRegion> result = new ArrayList<>();
@@ -104,8 +121,8 @@ public class SubletMarketGui extends Gui {
 	}
 
 	/**
-	 * Try to rent a spot in a region for the player.
-	 * @param region The region to rent space in
+	 * Try to rent a shop from its holder for the player.
+	 * @param region The shop to rent
 	 */
 	private void rent(GeneralRegion region) {
 		if(!player.hasPermission("areashop.subrent")) {
@@ -138,7 +155,12 @@ public class SubletMarketGui extends Gui {
 			});
 		}
 
-		set(row + 4, Icon.of(Material.BOOK).name("panel-pageStatus", page + 1, pages).build());
+		set(row + 4, Icon.of(Material.BOOK)
+				.name("panel-pageStatus", page + 1, pages)
+				.lore("panel-availableCount", offers.size())
+				.build());
+
+		setBack(row + 6, parent);
 
 		if(page < pages - 1) {
 			set(row + 8, Icon.of(Material.ARROW).name("panel-nextPage", page + 2, pages).build(), click -> {

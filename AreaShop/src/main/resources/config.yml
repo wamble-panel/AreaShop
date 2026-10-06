@@ -99,6 +99,149 @@ limitGroups:
 
 
 # ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+# │ MARKETPLACE: The shop panel, shop names, subletting and the VillagerMarket integration.                                    │
+# └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+# How many visible characters the name set with '/as setname' may have (color codes do not count).
+shopNameMaxLength: 64
+
+# SUBLET: Letting the player holding a region rent the whole of it out to another player.
+# The region keeps its holder, who keeps paying for it, and one other player gets member access
+# until the time they paid for runs out. Players use '/as sublet' or the button in '/as panel'.
+sublet:
+  # Turn subletting on or off for the whole server.
+  enabled: true
+  # How often to check for rentals that have run out.
+  delay: '2 minutes'
+  # How many regions to check each tick while doing so.
+  regionsPerTick: 10
+
+# VILLAGERMARKET: Integration with the VillagerMarket plugin, used when it is installed.
+villagerMarket:
+  # What to do with the shop villagers standing in a region when it goes back on the market,
+  # which happens when a rent runs out, a region is unrented or sold back, or a region is deleted.
+  #   abandon: hand the shops back the way VillagerMarket does when a rent runs out. The owner gets
+  #            their deposit and collected money back and their stock goes to '/vm expiredstorage',
+  #            and the villager stays where it is for whoever rents the region next.
+  #   remove:  hand the shops back first, so nothing is lost, and then take the villagers away as
+  #            well, leaving the region empty.
+  #   nothing: leave the shops alone.
+  onRelease: abandon
+  # Whether shops owned by someone other than the player losing the region are cleared too.
+  # Leave this on for a marketplace, where the renter sublets stalls to other players.
+  # Shops without an owner and admin shops are never touched.
+  clearShopsOfOtherPlayers: true
+  # Letting the owner of a region make the stalls in it bigger from '/as panel'.
+  upgrades:
+    enabled: true
+    # The part customers buy from.
+    shopfront:
+      # Largest size a stall can be upgraded to, in slots. A row is 9 slots and 54 is a double chest.
+      maxSlots: 54
+      # What each extra row costs.
+      pricePerRow: 2500
+    # The part the owner of the stall stocks.
+    storage:
+      maxSlots: 54
+      pricePerRow: 2500
+
+# PANEL: The settings players can change for their own region from '/as panel'.
+# Each entry becomes one item in the settings menu, and clicking it moves to the next option.
+# The flag values use the same notation as the 'flagProfiles' section: a value, optionally followed
+# by 'g:<group>' to set the group of the flag, and an empty value clears the flag again.
+# Only flags listed here can ever be changed by a player, so leave out anything you do not want them to touch.
+# Add 'permission: some.permission' to an entry to limit who may change it.
+# These are applied after the flag profile of the region, so they are not lost when the region updates.
+panelFlags:
+  # Who may walk into the region.
+  entry:
+    item: OAK_DOOR
+    name: '&#FFD166&lWho can enter'
+    description: '&#B8C0CCChoose who may walk into your shop.'
+    options:
+      everyone:
+        name: '&#5CE1A8Everyone'
+        flags:
+          entry: ''
+      friends:
+        name: '&#FFD166Only you and the players you gave access'
+        flags:
+          entry: 'deny g:nonmembers'
+  # Whether players can fight inside the region.
+  pvp:
+    item: IRON_SWORD
+    name: '&#FFD166&lFighting'
+    description: '&#B8C0CCAllow or block fighting in your shop.'
+    options:
+      'off':
+        name: '&#5CE1A8No fighting'
+        flags:
+          pvp: 'deny'
+      'on':
+        name: '&#FF8A8AFighting allowed'
+        flags:
+          pvp: 'allow'
+  # Whether monsters can spawn inside the region.
+  mobs:
+    item: ZOMBIE_HEAD
+    name: '&#FFD166&lMonsters'
+    description: '&#B8C0CCKeep monsters out of your shop.'
+    options:
+      'off':
+        name: '&#5CE1A8No monsters'
+        flags:
+          mob-spawning: 'deny'
+      'on':
+        name: '&#FF8A8AMonsters can spawn'
+        flags:
+          mob-spawning: 'allow'
+  # Whether visitors may open your chests.
+  chests:
+    item: CHEST
+    name: '&#FFD166&lChest access'
+    description: '&#B8C0CCChoose who may open the containers in your shop.'
+    options:
+      friends:
+        name: '&#5CE1A8Only you and the players you gave access'
+        flags:
+          chest-access: 'deny g:nonmembers'
+      everyone:
+        name: '&#FF8A8AEveryone'
+        flags:
+          chest-access: 'allow'
+  # Whether players other than you may build in the region.
+  build:
+    item: IRON_PICKAXE
+    name: '&#FFD166&lBuilding'
+    description: '&#B8C0CCChoose who may change the blocks in your shop.'
+    options:
+      friends:
+        name: '&#5CE1A8Only you and the players you gave access'
+        flags:
+          build: 'deny g:nonmembers'
+      everyone:
+        name: '&#FF8A8AEveryone'
+        flags:
+          build: 'allow'
+  # Whether the greeting and farewell messages of the region are shown.
+  greeting:
+    item: OAK_SIGN
+    name: '&#FFD166&lGreeting message'
+    description: '&#B8C0CCShow a message when someone walks in or out.'
+    options:
+      # WorldGuard shows these without colors, so plain text is all that is useful here.
+      'on':
+        name: '&#5CE1A8Show the message'
+        flags:
+          greeting: 'Welcome to %shopname%'
+          farewell: 'Thanks for visiting %shopname%'
+      'off':
+        name: '&#FF8A8ANo message'
+        flags:
+          greeting: ''
+          farewell: ''
+
+
+# ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 # │ ADVANCED AND DEBUG: Specific options to tweak the plugin precisely and check if it functions correctly.                    │
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 # Blacklist of region names that cannot be added to AreaShop for renting or buying. Regular expressions can be used, search

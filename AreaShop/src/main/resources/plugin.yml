@@ -60,6 +60,7 @@ permissions:
       areashop.panel: true
       areashop.panel.settings: true
       areashop.panel.market: true
+      areashop.panel.others: true
       areashop.guide: true
       areashop.sublet: true
       areashop.subrent: true
@@ -237,6 +238,9 @@ permissions:
   areashop.panel.market:
     description: Allows you to see and upgrade the VillagerMarket stalls standing in your own regions
     default: true
+  areashop.panel.others:
+    description: Allows you to open the panel of a shop you do not hold, and to look up the shops of another player
+    default: op
   areashop.guide:
     description: Allows you to open the guide that explains how everything works
     default: true

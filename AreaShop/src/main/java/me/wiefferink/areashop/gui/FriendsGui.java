@@ -53,7 +53,7 @@ public class FriendsGui extends Gui {
 
 	@Override
 	protected void build() {
-		if(region.isDeleted() || !region.isOwner(player)) {
+		if(!mayManage(region)) {
 			set(22, Icon.of(Material.BARRIER).name("panel-shopGoneName").lore("panel-shopGoneLore").build());
 			buildNavigation(1);
 			return;
@@ -136,9 +136,7 @@ public class FriendsGui extends Gui {
 			});
 		}
 
-		if(parent != null) {
-			set(row + 3, Icon.of(Material.ARROW).name("panel-back").build(), click -> parent.open());
-		}
+		setBack(row + 3, parent);
 
 		if(player.hasPermission("areashop.addfriend")) {
 			set(row + 5, Icon.of(Material.LIME_DYE)

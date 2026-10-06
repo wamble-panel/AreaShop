@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -105,5 +106,27 @@ class ConfigSectionsTest {
 		// The second run sees the sections that the first one added, so it finds nothing to do
 		Map<String, List<String>> stillMissing = ConfigSections.missing(sections, ConfigSections.read(once).keySet());
 		assertTrue(stillMissing.isEmpty(), "a second startup should not append the same settings again");
+	}
+
+	@Test
+	void writesTheVersionOfTheFile() {
+		List<String> lines = List.of("chatPrefix: 'x'", "version: 2.6.0", "debug: false");
+		List<String> updated = ConfigSections.setScalar(lines, "version", "2.7.0");
+
+		assertEquals(List.of("chatPrefix: 'x'", "version: 2.7.0", "debug: false"), updated);
+	}
+
+	@Test
+	void leavesTheFileAloneWhenItHasNoVersion() {
+		List<String> lines = List.of("chatPrefix: 'x'", "debug: false");
+		assertEquals(lines, ConfigSections.setScalar(lines, "version", "2.7.0"));
+	}
+
+	@Test
+	void readsTheVersionOfTheFile() {
+		assertEquals("2.6.0", ConfigSections.getScalar(List.of("version: 2.6.0"), "version"));
+		assertEquals("2.6.0", ConfigSections.getScalar(List.of("version: '2.6.0'"), "version"));
+		assertEquals("2.6.0", ConfigSections.getScalar(List.of("version: \"2.6.0\""), "version"));
+		assertNull(ConfigSections.getScalar(List.of("debug: false"), "version"), "a file without it reads as nothing");
 	}
 }

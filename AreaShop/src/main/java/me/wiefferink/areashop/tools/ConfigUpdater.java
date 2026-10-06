@@ -32,6 +32,9 @@ import java.util.Set;
  */
 public final class ConfigUpdater {
 
+	/** The setting that records which version of the plugin a file was written for. */
+	private static final String VERSION_KEY = "version";
+
 	private ConfigUpdater() {
 	}
 
@@ -70,7 +73,12 @@ public final class ConfigUpdater {
 		}
 
 		Map<String, List<String>> missing = ConfigSections.missing(ConfigSections.read(bundled), present);
-		if(missing.isEmpty()) {
+
+		// The version the file was written for, so an owner can see their file was brought along
+		String version = ConfigSections.getScalar(bundled, VERSION_KEY);
+		boolean staleVersion = version != null && !version.equals(ConfigSections.getScalar(current, VERSION_KEY));
+
+		if(missing.isEmpty() && !staleVersion) {
 			return List.of();
 		}
 
@@ -78,15 +86,24 @@ public final class ConfigUpdater {
 			return List.of();
 		}
 
+		List<String> updated = ConfigSections.append(current, missing);
+		if(staleVersion) {
+			updated = ConfigSections.setScalar(updated, VERSION_KEY, version);
+		}
+
 		try {
-			Files.write(target, ConfigSections.append(current, missing), StandardCharsets.UTF_8);
+			Files.write(target, updated, StandardCharsets.UTF_8);
 		} catch(IOException e) {
 			AreaShop.warn("Could not write the new settings to", target.getFileName().toString() + ":", e.getMessage());
 			return List.of();
 		}
 
-		AreaShop.info("Added " + missing.size() + " new setting(s) to " + target.getFileName() + ": "
-				+ Utils.createCommaSeparatedList(missing.keySet()));
+		if(missing.isEmpty()) {
+			AreaShop.info("Noted in " + target.getFileName() + " that it is up to date with version " + version);
+		} else {
+			AreaShop.info("Added " + missing.size() + " new setting(s) to " + target.getFileName() + ": "
+					+ Utils.createCommaSeparatedList(missing.keySet()));
+		}
 		return new ArrayList<>(missing.keySet());
 	}
 

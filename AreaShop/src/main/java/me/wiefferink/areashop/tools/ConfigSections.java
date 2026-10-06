@@ -124,6 +124,50 @@ public final class ConfigSections {
 	}
 
 	/**
+	 * Write a new value for a top level setting that holds a single value.
+	 *
+	 * <p>Used for the version the file was written for, which says nothing about the settings but
+	 * does tell a server owner at a glance that their file was brought up to date. Only the first
+	 * line that sets the key is touched, and a file that does not have it is left alone.
+	 *
+	 * @param lines The lines of the file
+	 * @param key   The top level key to write
+	 * @param value The value to write
+	 * @return The lines of the file, with the value replaced
+	 */
+	public static List<String> setScalar(List<String> lines, String key, String value) {
+		List<String> result = new ArrayList<>(lines);
+		for(int index = 0; index < result.size(); index++) {
+			if(result.get(index).startsWith(key + ":")) {
+				result.set(index, key + ": " + value);
+				break;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Read the value of a top level setting that holds a single value.
+	 * @param lines The lines of the file
+	 * @param key   The top level key to read
+	 * @return The value as it is written, without quotes, or null when the file does not set it
+	 */
+	public static String getScalar(List<String> lines, String key) {
+		for(String line : lines) {
+			if(!line.startsWith(key + ":")) {
+				continue;
+			}
+			String value = line.substring(key.length() + 1).trim();
+			if(value.length() > 1 && (value.startsWith("'") && value.endsWith("'")
+					|| value.startsWith("\"") && value.endsWith("\""))) {
+				return value.substring(1, value.length() - 1);
+			}
+			return value;
+		}
+		return null;
+	}
+
+	/**
 	 * Drop the blank lines around a section.
 	 *
 	 * <p>Appending puts its own blank line between sections, so carrying these along would only

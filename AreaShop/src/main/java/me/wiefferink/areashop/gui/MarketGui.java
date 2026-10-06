@@ -51,7 +51,7 @@ public class MarketGui extends Gui {
 
 	@Override
 	protected void build() {
-		if(region.isDeleted() || !region.isOwner(player)) {
+		if(!mayManage(region)) {
 			set(22, Icon.of(Material.BARRIER).name("panel-shopGoneName").lore("panel-shopGoneLore").build());
 			buildNavigation(1);
 			return;
@@ -112,9 +112,7 @@ public class MarketGui extends Gui {
 			});
 		}
 
-		if(parent != null) {
-			set(row + 4, Icon.of(Material.ARROW).name("panel-back").build(), click -> parent.open());
-		}
+		setBack(row + 4, parent);
 
 		if(page < pages - 1) {
 			set(row + 8, Icon.of(Material.ARROW).name("panel-nextPage", page + 2, pages).build(), click -> {
