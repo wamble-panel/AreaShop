@@ -1,10 +1,12 @@
 package me.wiefferink.areashop.gui;
 
+import me.wiefferink.areashop.features.SubletFeature;
 import me.wiefferink.areashop.integrations.VillagerMarketHook;
 import me.wiefferink.areashop.messages.Message;
 import me.wiefferink.areashop.regions.BuyRegion;
 import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.regions.RentRegion;
+import me.wiefferink.areashop.tools.Utils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -127,10 +129,18 @@ public class ShopGui extends Gui {
 		if(!player.hasPermission("areashop.sublet") || !plugin.getConfig().getBoolean("sublet.enabled", true)) {
 			return;
 		}
-		int tenants = region.getSubletFeature().countActiveTenants();
+		SubletFeature sublet = region.getSubletFeature();
+		String lore;
+		if(sublet.isRentedOut()) {
+			lore = "panel-subletLoreRented";
+		} else if(sublet.isOffered()) {
+			lore = "panel-subletLoreOn";
+		} else {
+			lore = "panel-subletLoreOff";
+		}
 		set(25, Icon.of(Material.GOLD_INGOT)
 				.name("panel-subletName")
-				.lore(region.getSubletFeature().isOffered() ? "panel-subletLoreOn" : "panel-subletLoreOff", tenants)
+				.lore(lore, SubletFeature.nameOf(sublet.getTenant()), Utils.millisToHumanFormat(sublet.getTimeLeft()))
 				.build(), click -> new SubletGui(player, region, this).open());
 	}
 

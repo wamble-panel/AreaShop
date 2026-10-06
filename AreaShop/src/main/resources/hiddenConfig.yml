@@ -46,14 +46,12 @@ adding:
 # │ OTHER: All other settings.                                                                                                 │
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 # ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-# │ SUBLET: Letting the player holding a region rent space in it out to other players.                                         │
+# │ SUBLET: Letting the player holding a region rent the whole of it out to another player.                                    │
 # └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 sublet:
   # Turn subletting on or off for the whole server.
   enabled: true
-  # How many players may rent space in one region at the same time, 0 for no limit.
-  maxTenants: 0
-  # How often to check for sublet spots that have run out.
+  # How often to check for rentals that have run out.
   delay: '2 minutes'
   # How many regions to check each tick while doing so.
   regionsPerTick: 10

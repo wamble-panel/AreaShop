@@ -69,7 +69,12 @@ public class SubletMarketGui extends Gui {
 	private List<GeneralRegion> findOffers() {
 		List<GeneralRegion> result = new ArrayList<>();
 		for(GeneralRegion region : plugin.getFileManager().getRegions()) {
-			if(region.getSubletFeature().isOffered() && !region.isOwner(player)) {
+			SubletFeature sublet = region.getSubletFeature();
+			if(region.isOwner(player)) {
+				continue;
+			}
+			// What you already rent stays visible so you can add time to it
+			if(sublet.isAvailable() || sublet.isTenant(player.getUniqueId())) {
 				result.add(region);
 			}
 		}
@@ -84,19 +89,18 @@ public class SubletMarketGui extends Gui {
 	 */
 	private ItemStack buildOfferIcon(GeneralRegion region) {
 		SubletFeature sublet = region.getSubletFeature();
-		boolean alreadyIn = sublet.isTenant(player.getUniqueId());
+		boolean mine = sublet.isTenant(player.getUniqueId());
 
-		Icon icon = Icon.of(alreadyIn ? Material.LIME_CONCRETE : Material.CHEST)
+		Icon icon = Icon.of(mine ? Material.LIME_CONCRETE : Material.CHEST)
 				.name("panel-offerName", region)
 				.lore("panel-offerLore", Utils.formatCurrency(sublet.getPrice()), sublet.getDuration(),
-						region.getSubletFeature().getHolder() == null ? "?" : region.getSubletFeature().getHolder().getName());
+						sublet.getHolder() == null ? "?" : sublet.getHolder().getName());
 
-		if(alreadyIn) {
-			long left = sublet.getEndTime(player.getUniqueId()) - System.currentTimeMillis();
-			icon.blank().lore("panel-offerAlreadyIn", Utils.millisToHumanFormat(Math.max(0, left)));
+		if(mine) {
+			icon.blank().lore("panel-offerAlreadyIn", Utils.millisToHumanFormat(sublet.getTimeLeft()));
 		}
 
-		return icon.blank().lore("panel-offerRent").build();
+		return icon.blank().lore(mine ? "panel-offerExtend" : "panel-offerRent").build();
 	}
 
 	/**

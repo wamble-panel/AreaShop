@@ -11,12 +11,13 @@ requirements below before updating.
 * **WorldGuard 7.0.17+** and **WorldEdit 7.4.4+**
 
 **Features:**
-* Subletting: the player holding a region can rent space in it out to other players and keep the
-  money. They set a price and how long a spot lasts from `/as panel`, and anyone can browse what is
-  on offer with `/as sublet`. A subtenant gets build access until their time runs out, and paying
-  again before then adds to what is left rather than replacing it. Spots that run out are taken away
-  on their own and the player is told. Guarded by `areashop.sublet` to rent space out and
-  `areashop.subrent` to rent some, with a `sublet` section in the config for the limits and timing.
+* Subletting: the player holding a region can rent the whole of it out to another player and keep
+  the money. They set a price and a duration from `/as panel`, and anyone can see what is on offer
+  with `/as sublet`. One player rents it at a time and has the run of the place until their time is
+  up; paying again before then adds to what is left rather than replacing it. The holder stays the
+  owner, can take it back whenever they want, and gets it back on its own when the time runs out.
+  Guarded by `areashop.sublet` to rent a shop out and `areashop.subrent` to rent one, with a
+  `sublet` section in the config for the timing.
 * An in-game guide: `/as guide`, also reachable from the panel, explaining shops, renting, buying,
   access, settings, market stalls, subletting, signs and the commands, one item per topic in plain
   words. Written in small capitals with hex colors, and entirely in the language file so a server can
