@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Java 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: 'temurin'
@@ -25,11 +25,40 @@ jobs:
       # Checkstyle runs in the validate phase and fails the build on a violation,
       # the tests run in the test phase, and the shaded jar comes out of package
       - name: Build
-        run: mvn -B -Dbuild.number="#${{ github.run_number }}" clean package
+        run: |
+          set -o pipefail
+          mvn -B -Dbuild.number="#${{ github.run_number }}" clean package 2>&1 | tee build.log
+
+      - name: Summarise the build
+        if: always()
+        run: |
+          {
+            echo "## AreaShop build ${{ github.run_number }}"
+            echo
+            if grep -q "Tests run:" build.log; then
+              echo "### Tests"
+              echo '```'
+              grep "Tests run:" build.log | tail -1
+              echo '```'
+            fi
+            echo "### Deprecated API in use"
+            echo
+            if grep -q "has been deprecated" build.log; then
+              echo '```'
+              grep "has been deprecated" build.log | sed 's/^\[WARNING\] //' | sort -u | head -50
+              echo '```'
+            else
+              echo "None."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Also as annotations, so they show up on the commit without opening the log
+          grep "has been deprecated" build.log | sed 's/^\[WARNING\] //' | sort -u | head -20 \
+            | while IFS= read -r line; do echo "::warning title=Deprecated API::$line"; done
 
       - name: Upload the plugin
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: AreaShop
           path: AreaShop/target/AreaShop.jar
@@ -37,7 +66,7 @@ jobs:
 
       - name: Upload the test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-reports
           path: AreaShop/target/surefire-reports/
