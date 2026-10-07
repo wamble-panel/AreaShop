@@ -62,8 +62,8 @@ permissions:
       areashop.panel.market: true
       areashop.panel.others: true
       areashop.guide: true
-      areashop.sublet: true
-      areashop.subrent: true
+      areashop.rentout: true
+      areashop.rentfrom: true
       areashop.linksigns: true
       areashop.message: true
       areashop.import: true
@@ -244,11 +244,11 @@ permissions:
   areashop.guide:
     description: Allows you to open the guide that explains how everything works
     default: true
-  areashop.sublet:
-    description: Allows you to rent space in a region you hold out to other players
+  areashop.rentout:
+    description: Allows you to rent a region you hold out to another player
     default: true
-  areashop.subrent:
-    description: Allows you to rent space in a region from the player holding it
+  areashop.rentfrom:
+    description: Allows you to rent a region from the player who holds it
     default: true
   areashop.setownerrent:
     description: Allows you to set the owner of rent regions

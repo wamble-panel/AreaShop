@@ -1,6 +1,6 @@
 package me.wiefferink.areashop.gui;
 
-import me.wiefferink.areashop.features.SubletFeature;
+import me.wiefferink.areashop.features.RentOutFeature;
 import me.wiefferink.areashop.integrations.VillagerMarketHook;
 import me.wiefferink.areashop.messages.Message;
 import me.wiefferink.areashop.regions.BuyRegion;
@@ -62,7 +62,7 @@ public class ShopGui extends Gui {
 			buildFriends();
 			buildSettings();
 			buildMarket();
-			buildSublet();
+			buildRentOut();
 			buildName();
 			buildMoneyActions();
 		} else {
@@ -84,10 +84,10 @@ public class ShopGui extends Gui {
 				.name("panel-shopName", region)
 				.lore("panel-shopLore", region);
 
-		SubletFeature sublet = region.getSubletFeature();
-		if(sublet.isRentedOut()) {
-			icon.blank().lore("panel-shopRentedOut", SubletFeature.nameOf(sublet.getTenant()),
-					Utils.millisToHumanFormat(sublet.getTimeLeft()));
+		RentOutFeature rentOut = region.getRentOutFeature();
+		if(rentOut.isRentedOut()) {
+			icon.blank().lore("panel-shopRentedOut", RentOutFeature.nameOf(rentOut.getRenter()),
+					Utils.millisToHumanFormat(rentOut.getTimeLeft()));
 		}
 
 		set(4, icon.build());
@@ -151,26 +151,26 @@ public class ShopGui extends Gui {
 	}
 
 	/**
-	 * Add the button that opens the subletting menu, where the holder rents the whole shop out to
+	 * Add the button that opens the renting out menu, where the holder rents the whole shop out to
 	 * another player.
 	 */
-	private void buildSublet() {
-		if(!player.hasPermission("areashop.sublet") || !plugin.getConfig().getBoolean("sublet.enabled", true)) {
+	private void buildRentOut() {
+		if(!player.hasPermission("areashop.rentout") || !plugin.getConfig().getBoolean("rentOut.enabled", true)) {
 			return;
 		}
-		SubletFeature sublet = region.getSubletFeature();
+		RentOutFeature rentOut = region.getRentOutFeature();
 		String lore;
-		if(sublet.isRentedOut()) {
-			lore = "panel-subletLoreRented";
-		} else if(sublet.isOffered()) {
-			lore = "panel-subletLoreOn";
+		if(rentOut.isRentedOut()) {
+			lore = "panel-rentOutLoreRented";
+		} else if(rentOut.isOffered()) {
+			lore = "panel-rentOutLoreOn";
 		} else {
-			lore = "panel-subletLoreOff";
+			lore = "panel-rentOutLoreOff";
 		}
 		set(23, Icon.of(Material.GOLD_INGOT)
-				.name("panel-subletName")
-				.lore(lore, SubletFeature.nameOf(sublet.getTenant()), Utils.millisToHumanFormat(sublet.getTimeLeft()))
-				.build(), click -> new SubletGui(player, region, this).open());
+				.name("panel-rentOutName")
+				.lore(lore, RentOutFeature.nameOf(rentOut.getRenter()), Utils.millisToHumanFormat(rentOut.getTimeLeft()))
+				.build(), click -> new RentOutGui(player, region, this).open());
 	}
 
 	/**

@@ -32,11 +32,11 @@ class ConfigSectionsTest {
 			"  rent: '[asrent]'",
 			"  buy: '[asbuy]'",
 			"",
-			"# Letting players rent space out.",
-			"sublet:",
+			"# Letting players rent their shop out.",
+			"rentOut:",
 			"  enabled: true",
-			"  # How many may rent at once.",
-			"  maxTenants: 0",
+			"  # How long a rental lasts.",
+			"  duration: '7 days'",
 			"",
 			"# Whether to send stats.",
 			"sendStats: true"
@@ -46,7 +46,7 @@ class ConfigSectionsTest {
 	void splitsIntoSectionsWithTheirComments() {
 		Map<String, List<String>> sections = ConfigSections.read(BUNDLED);
 
-		assertEquals(List.of("chatPrefix", "language", "signTags", "sublet", "sendStats"),
+		assertEquals(List.of("chatPrefix", "language", "signTags", "rentOut", "sendStats"),
 				List.copyOf(sections.keySet()), "every top level key becomes a section, in order");
 
 		assertEquals(List.of("# The language to use.", "language: EN"), sections.get("language"),
@@ -54,7 +54,7 @@ class ConfigSectionsTest {
 
 		assertTrue(sections.get("signTags").contains("  rent: '[asrent]'"),
 				"indented lines stay with the key above them");
-		assertTrue(sections.get("sublet").contains("  # How many may rent at once."),
+		assertTrue(sections.get("rentOut").contains("  # How long a rental lasts."),
 				"comments inside a section stay inside it");
 	}
 
@@ -63,7 +63,7 @@ class ConfigSectionsTest {
 		Map<String, List<String>> sections = ConfigSections.read(BUNDLED);
 		Map<String, List<String>> missing = ConfigSections.missing(sections, Set.of("chatPrefix", "language", "signTags", "sendStats"));
 
-		assertEquals(Set.of("sublet"), missing.keySet());
+		assertEquals(Set.of("rentOut"), missing.keySet());
 	}
 
 	@Test
@@ -86,8 +86,8 @@ class ConfigSectionsTest {
 			assertTrue(merged.contains(line), "line was lost: " + line);
 		}
 		assertEquals(existing, merged.subList(0, existing.size()), "what was there stays at the top, unchanged");
-		assertTrue(merged.contains("sublet:"), "the missing section was added");
-		assertTrue(merged.contains("# Letting players rent space out."), "its comment came along");
+		assertTrue(merged.contains("rentOut:"), "the missing section was added");
+		assertTrue(merged.contains("# Letting players rent their shop out."), "its comment came along");
 		assertTrue(merged.stream().anyMatch(line -> line.contains("Added by a plugin update")),
 				"what was added is marked as such");
 	}

@@ -1,5 +1,6 @@
 package me.wiefferink.areashop.features;
 
+import me.wiefferink.areashop.AreaShop;
 import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.tools.Utils;
 import net.milkbowl.vault.economy.Economy;
@@ -8,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -15,22 +17,62 @@ import java.util.UUID;
  *
  * <p>A market is rented or bought from the server by one player, who can then hand it over to
  * someone else for a while and be paid for it. The region is let out as a whole: there is one
- * subtenant at a time, who has the run of the place until their time is up.
+ * renter at a time, who has the run of the place until their time is up.
  *
  * <p>This sits next to the renting and buying of the region instead of inside it. The server keeps
- * dealing with one holder, who stays responsible for the rent or the purchase, and subletting only
- * hands out access that runs out on its own.
+ * dealing with one holder, who stays responsible for the rent or the purchase, and renting it out
+ * only hands out access that runs out on its own.
  */
-public class SubletFeature extends RegionFeature {
+public class RentOutFeature extends RegionFeature {
 
-	/** Where the offer and the subtenant are kept in the region file. */
-	private static final String PATH = "general.sublet";
+	/** Where the offer and the renter are kept in the region file. */
+	private static final String PATH = "general.rentOut";
 
-	public SubletFeature() {
+	/** What the same settings were called while the feature was named after subletting. */
+	private static final String OLD_PATH = "general.sublet";
+
+	/** The settings moved from the old name to the new one, by what they used to be called. */
+	private static final Map<String, String> MOVED_SETTINGS = Map.of(
+			"enabled", "enabled",
+			"price", "price",
+			"duration", "duration",
+			"tenant", "renter",
+			"until", "until"
+	);
+
+	public RentOutFeature() {
 	}
 
-	public SubletFeature(GeneralRegion region) {
+	public RentOutFeature(GeneralRegion region) {
 		setRegion(region);
+	}
+
+	@Override
+	public void setRegion(GeneralRegion region) {
+		super.setRegion(region);
+		moveOldSettings();
+	}
+
+	/**
+	 * Bring the settings of a region written before this was renamed over to the new name.
+	 *
+	 * <p>Runs once per region, the first time anything asks about renting it out, and leaves a
+	 * region that has nothing stored under the old name alone.
+	 */
+	private void moveOldSettings() {
+		GeneralRegion region = getRegion();
+		if(region == null || region.getConfig().getConfigurationSection(OLD_PATH) == null) {
+			return;
+		}
+
+		for(Map.Entry<String, String> setting : MOVED_SETTINGS.entrySet()) {
+			Object value = region.getConfig().get(OLD_PATH + "." + setting.getKey());
+			if(value != null) {
+				region.setSetting(PATH + "." + setting.getValue(), value);
+			}
+		}
+		region.setSetting(OLD_PATH, null);
+		AreaShop.debug("Moved the renting out settings of", region.getName(), "to their new name");
 	}
 
 	/**
@@ -45,10 +87,10 @@ public class SubletFeature extends RegionFeature {
 
 	/**
 	 * Check if another player has the region at the moment.
-	 * @return true when there is a subtenant whose time has not run out
+	 * @return true when there is a renter whose time has not run out
 	 */
 	public boolean isRentedOut() {
-		return getTenant() != null && getEndTime() > System.currentTimeMillis();
+		return getRenter() != null && getEndTime() > System.currentTimeMillis();
 	}
 
 	/**
@@ -109,10 +151,10 @@ public class SubletFeature extends RegionFeature {
 
 	/**
 	 * Get the player that has the region at the moment.
-	 * @return The subtenant, or null when nobody has it
+	 * @return The renter, or null when nobody has it
 	 */
-	public UUID getTenant() {
-		String stored = getRegion().getConfig().getString(PATH + ".tenant");
+	public UUID getRenter() {
+		String stored = getRegion().getConfig().getString(PATH + ".renter");
 		if(stored == null) {
 			return null;
 		}
@@ -124,7 +166,7 @@ public class SubletFeature extends RegionFeature {
 	}
 
 	/**
-	 * Get when the time of the subtenant runs out.
+	 * Get when the time of the renter runs out.
 	 * @return The end of their time in milliseconds since the epoch, or 0 when nobody has the region
 	 */
 	public long getEndTime() {
@@ -132,7 +174,7 @@ public class SubletFeature extends RegionFeature {
 	}
 
 	/**
-	 * Get how long the subtenant has left.
+	 * Get how long the renter has left.
 	 * @return The time left in milliseconds, or 0 when nobody has the region
 	 */
 	public long getTimeLeft() {
@@ -144,8 +186,8 @@ public class SubletFeature extends RegionFeature {
 	 * @param player The player to check
 	 * @return true when they have it and their time has not run out
 	 */
-	public boolean isTenant(UUID player) {
-		return player != null && player.equals(getTenant()) && getEndTime() > System.currentTimeMillis();
+	public boolean isRenter(UUID player) {
+		return player != null && player.equals(getRenter()) && getEndTime() > System.currentTimeMillis();
 	}
 
 	/**
@@ -165,7 +207,7 @@ public class SubletFeature extends RegionFeature {
 		if(region.isOwner(player)) {
 			return Result.OWN_REGION;
 		}
-		if(isRentedOut() && !isTenant(player.getUniqueId())) {
+		if(isRentedOut() && !isRenter(player.getUniqueId())) {
 			return Result.ALREADY_RENTED;
 		}
 
@@ -198,8 +240,8 @@ public class SubletFeature extends RegionFeature {
 		}
 
 		// Paying again before the time is up adds to what is left instead of replacing it
-		long from = Math.max(System.currentTimeMillis(), isTenant(player.getUniqueId()) ? getEndTime() : 0);
-		region.setSetting(PATH + ".tenant", player.getUniqueId().toString());
+		long from = Math.max(System.currentTimeMillis(), isRenter(player.getUniqueId()) ? getEndTime() : 0);
+		region.setSetting(PATH + ".renter", player.getUniqueId().toString());
 		region.setSetting(PATH + ".until", from + getDurationMillis());
 		region.getFriendsFeature().addFriend(player.getUniqueId(), player);
 		region.update();
@@ -211,38 +253,38 @@ public class SubletFeature extends RegionFeature {
 	 * @return The player it was taken from, or null when nobody had it
 	 */
 	public UUID endRental() {
-		UUID tenant = getTenant();
-		if(tenant == null) {
+		UUID renter = getRenter();
+		if(renter == null) {
 			return null;
 		}
 
 		GeneralRegion region = getRegion();
-		region.setSetting(PATH + ".tenant", null);
+		region.setSetting(PATH + ".renter", null);
 		region.setSetting(PATH + ".until", null);
-		region.getFriendsFeature().deleteFriend(tenant, null);
+		region.getFriendsFeature().deleteFriend(renter, null);
 		region.update();
-		return tenant;
+		return renter;
 	}
 
 	/**
-	 * Take the region back when the time of the subtenant has run out.
+	 * Take the region back when the time of the renter has run out.
 	 * @return true when a rental was ended
 	 */
 	public boolean removeExpired() {
-		UUID tenant = getTenant();
-		if(tenant == null || getEndTime() > System.currentTimeMillis()) {
+		UUID renter = getRenter();
+		if(renter == null || getEndTime() > System.currentTimeMillis()) {
 			return false;
 		}
 
 		endRental();
-		OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(tenant);
+		OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(renter);
 		if(offlinePlayer.isOnline()) {
-			plugin.message(offlinePlayer.getPlayer(), "sublet-expired", getRegion());
+			plugin.message(offlinePlayer.getPlayer(), "rentout-expired", getRegion());
 		}
 
 		OfflinePlayer holder = getHolder();
 		if(holder != null && holder.isOnline()) {
-			plugin.message(holder.getPlayer(), "sublet-expiredHolder", nameOf(tenant), getRegion());
+			plugin.message(holder.getPlayer(), "rentout-expiredHolder", nameOf(renter), getRegion());
 		}
 		return true;
 	}
@@ -273,14 +315,14 @@ public class SubletFeature extends RegionFeature {
 	 * What came of trying to rent a region.
 	 */
 	public enum Result {
-		SUCCESS("sublet-success"),
-		NOT_OFFERED("sublet-notOffered"),
-		OWN_REGION("sublet-ownRegion"),
-		ALREADY_RENTED("sublet-alreadyRented"),
-		NO_HOLDER("sublet-noHolder"),
+		SUCCESS("rentout-success"),
+		NOT_OFFERED("rentout-notOffered"),
+		OWN_REGION("rentout-ownRegion"),
+		ALREADY_RENTED("rentout-alreadyRented"),
+		NO_HOLDER("rentout-noHolder"),
 		NO_ECONOMY("general-noEconomy"),
-		NOT_ENOUGH_MONEY("sublet-notEnoughMoney"),
-		PAYMENT_FAILED("sublet-paymentFailed");
+		NOT_ENOUGH_MONEY("rentout-notEnoughMoney"),
+		PAYMENT_FAILED("rentout-paymentFailed");
 
 		private final String messageKey;
 

@@ -190,7 +190,7 @@ public abstract class Gui implements InventoryHolder {
 			return false;
 		}
 		return mayManage(region)
-				|| region.getSubletFeature().isTenant(player.getUniqueId())
+				|| region.getRentOutFeature().isRenter(player.getUniqueId())
 				|| region.getFriendsFeature().getFriends().contains(player.getUniqueId());
 	}
 

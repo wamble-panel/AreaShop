@@ -1,6 +1,6 @@
 package me.wiefferink.areashop.gui;
 
-import me.wiefferink.areashop.features.SubletFeature;
+import me.wiefferink.areashop.features.RentOutFeature;
 import me.wiefferink.areashop.messages.Colors;
 import me.wiefferink.areashop.messages.Message;
 import me.wiefferink.areashop.regions.BuyRegion;
@@ -116,7 +116,7 @@ public class ShopsGui extends Gui {
 		if(!subject.getUniqueId().equals(player.getUniqueId())) {
 			return null;
 		}
-		if(region.getSubletFeature().isTenant(id)) {
+		if(region.getRentOutFeature().isRenter(id)) {
 			return Role.TENANT;
 		}
 		if(region.getFriendsFeature().getFriends().contains(id)) {
@@ -196,11 +196,11 @@ public class ShopsGui extends Gui {
 				.lore("panel-shopCount", shops.size())
 				.build());
 
-		if(plugin.getConfig().getBoolean("sublet.enabled", true)) {
+		if(plugin.getConfig().getBoolean("rentOut.enabled", true)) {
 			set(row + 5, Icon.of(Material.GOLD_INGOT)
-					.name("panel-subletMarketName")
-					.lore("panel-subletMarketLore")
-					.build(), click -> new SubletMarketGui(player, this).open());
+					.name("panel-rentFromName")
+					.lore("panel-rentFromLore")
+					.build(), click -> new RentFromGui(player, this).open());
 		}
 
 		set(row + 6, Icon.of(Material.BARRIER).name("panel-close").build(), click -> player.closeInventory());
@@ -226,16 +226,16 @@ public class ShopsGui extends Gui {
 				.name("panel-shopName", region)
 				.lore("panel-shopLore", region);
 
-		if(role == Role.HOLDER && region.getSubletFeature().isRentedOut()) {
+		if(role == Role.HOLDER && region.getRentOutFeature().isRentedOut()) {
 			icon.lore("panel-shopRentedOut",
-					SubletFeature.nameOf(region.getSubletFeature().getTenant()),
-					Utils.millisToHumanFormat(region.getSubletFeature().getTimeLeft()));
+					RentOutFeature.nameOf(region.getRentOutFeature().getRenter()),
+					Utils.millisToHumanFormat(region.getRentOutFeature().getTimeLeft()));
 		}
 
 		icon.blank();
 		if(role == Role.TENANT) {
-			icon.lore("panel-shopRole-tenant",
-					Utils.millisToHumanFormat(region.getSubletFeature().getTimeLeft()));
+			icon.lore("panel-shopRole-renter",
+					Utils.millisToHumanFormat(region.getRentOutFeature().getTimeLeft()));
 		} else if(role == Role.GUEST) {
 			icon.lore("panel-shopRole-guest");
 		}

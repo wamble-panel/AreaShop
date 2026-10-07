@@ -32,7 +32,7 @@ public class GuideGui extends Gui {
 			new Topic(13, Material.PLAYER_HEAD, "access"),
 			new Topic(14, Material.COMPARATOR, "settings"),
 			new Topic(15, Material.VILLAGER_SPAWN_EGG, "stalls"),
-			new Topic(16, Material.GOLD_INGOT, "subletting"),
+			new Topic(16, Material.GOLD_INGOT, "rentingOut"),
 			new Topic(21, Material.OAK_SIGN, "signs"),
 			new Topic(22, Material.COMPASS, "finding"),
 			new Topic(23, Material.WRITABLE_BOOK, "commands")

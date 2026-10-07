@@ -11,15 +11,15 @@ requirements below before updating.
 * **WorldGuard 7.0.17+** and **WorldEdit 7.4.4+**
 
 **Features:**
-* Subletting: the player holding a region can rent the whole of it out to another player and keep
-  the money. They set a price and a duration from `/as panel`, and anyone can see what is on offer
-  with `/as sublet`. One player rents it at a time and has the run of the place until their time is
-  up; paying again before then adds to what is left rather than replacing it. The holder stays the
-  owner, can take it back whenever they want, and gets it back on its own when the time runs out.
-  Guarded by `areashop.sublet` to rent a shop out and `areashop.subrent` to rent one, with a
-  `sublet` section in the config for the timing.
+* Renting out: the player holding a region can rent the whole of it out to another player and keep
+  the money. They set a price and a duration with `/as rentout <region> <price> <duration>` or from
+  `/as panel`, and anyone can see what is on offer with `/as rentfrom`. One player rents it at a time
+  and has the run of the place until their time is up; paying again before then adds to what is left
+  rather than replacing it. The holder stays the owner, can take it back whenever they want, and gets
+  it back on its own when the time runs out. Guarded by `areashop.rentout` to rent a shop out and
+  `areashop.rentfrom` to rent one, with a `rentOut` section in the config for the timing.
 * An in-game guide: `/as guide`, also reachable from the panel, explaining shops, renting, buying,
-  access, settings, market stalls, subletting, signs and the commands, one item per topic in plain
+  access, settings, market stalls, renting out, signs and the commands, one item per topic in plain
   words. Written in small capitals with hex colors, and entirely in the language file so a server can
   reword or restyle all of it.
 * Config files are brought up to date on startup. A plugin update that adds a setting now appends it
@@ -29,7 +29,7 @@ requirements below before updating.
   is kept next to it first, and the whole thing can be switched off with `updateFilesOnStartup`.
   The settings this release adds live in `config.yml` rather than `hiddenConfig.yml`, so they are
   appended to the file a server already has and can be read and changed there: `shopNameMaxLength`,
-  `sublet`, `villagerMarket` and `panelFlags`.
+  `rentOut`, `villagerMarket` and `panelFlags`.
 * VillagerMarket integration, for servers that run a marketplace with both plugins. It switches
   itself on when VillagerMarket is installed and stays out of the way when it is not.
   * When a region goes back on the market, the stalls standing in it are dealt with instead of

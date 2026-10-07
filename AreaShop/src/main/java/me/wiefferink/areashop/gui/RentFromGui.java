@@ -1,6 +1,6 @@
 package me.wiefferink.areashop.gui;
 
-import me.wiefferink.areashop.features.SubletFeature;
+import me.wiefferink.areashop.features.RentOutFeature;
 import me.wiefferink.areashop.messages.Message;
 import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.tools.Utils;
@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * The menu listing the shops whose holder is renting the whole of them out to another player.
  */
-public class SubletMarketGui extends Gui {
+public class RentFromGui extends Gui {
 
 	/** Rows used for the offers, the last row holds the navigation. */
 	private static final int OFFER_ROWS = 5;
@@ -33,7 +33,7 @@ public class SubletMarketGui extends Gui {
 	 * Construct the list of shops players are renting out.
 	 * @param player The player looking at it
 	 */
-	public SubletMarketGui(Player player) {
+	public RentFromGui(Player player) {
 		this(player, null);
 	}
 
@@ -42,14 +42,14 @@ public class SubletMarketGui extends Gui {
 	 * @param player The player looking at it
 	 * @param parent The menu to go back to, may be null
 	 */
-	public SubletMarketGui(Player player, Gui parent) {
+	public RentFromGui(Player player, Gui parent) {
 		super(player);
 		this.parent = parent;
 	}
 
 	@Override
 	protected Component title() {
-		return Message.fromKey("panel-subletMarketTitle").toComponent();
+		return Message.fromKey("panel-rentFromTitle").toComponent();
 	}
 
 	@Override
@@ -86,16 +86,16 @@ public class SubletMarketGui extends Gui {
 	private List<GeneralRegion> findOffers() {
 		List<GeneralRegion> result = new ArrayList<>();
 		for(GeneralRegion region : plugin.getFileManager().getRegions()) {
-			SubletFeature sublet = region.getSubletFeature();
+			RentOutFeature rentOut = region.getRentOutFeature();
 			if(region.isOwner(player)) {
 				continue;
 			}
 			// What you already rent stays visible so you can add time to it
-			if(sublet.isAvailable() || sublet.isTenant(player.getUniqueId())) {
+			if(rentOut.isAvailable() || rentOut.isRenter(player.getUniqueId())) {
 				result.add(region);
 			}
 		}
-		result.sort(Comparator.comparingDouble(region -> region.getSubletFeature().getPrice()));
+		result.sort(Comparator.comparingDouble(region -> region.getRentOutFeature().getPrice()));
 		return result;
 	}
 
@@ -105,16 +105,16 @@ public class SubletMarketGui extends Gui {
 	 * @return The item
 	 */
 	private ItemStack buildOfferIcon(GeneralRegion region) {
-		SubletFeature sublet = region.getSubletFeature();
-		boolean mine = sublet.isTenant(player.getUniqueId());
+		RentOutFeature rentOut = region.getRentOutFeature();
+		boolean mine = rentOut.isRenter(player.getUniqueId());
 
 		Icon icon = Icon.of(mine ? Material.LIME_CONCRETE : Material.CHEST)
 				.name("panel-offerName", region)
-				.lore("panel-offerLore", Utils.formatCurrency(sublet.getPrice()), sublet.getDuration(),
-						sublet.getHolder() == null ? "?" : sublet.getHolder().getName());
+				.lore("panel-offerLore", Utils.formatCurrency(rentOut.getPrice()), rentOut.getDuration(),
+						rentOut.getHolder() == null ? "?" : rentOut.getHolder().getName());
 
 		if(mine) {
-			icon.blank().lore("panel-offerAlreadyIn", Utils.millisToHumanFormat(sublet.getTimeLeft()));
+			icon.blank().lore("panel-offerAlreadyIn", Utils.millisToHumanFormat(rentOut.getTimeLeft()));
 		}
 
 		return icon.blank().lore(mine ? "panel-offerExtend" : "panel-offerRent").build();
@@ -125,16 +125,16 @@ public class SubletMarketGui extends Gui {
 	 * @param region The shop to rent
 	 */
 	private void rent(GeneralRegion region) {
-		if(!player.hasPermission("areashop.subrent")) {
-			plugin.message(player, "sublet-noPermissionRent");
+		if(!player.hasPermission("areashop.rentfrom")) {
+			plugin.message(player, "rentout-noPermissionRent");
 			return;
 		}
 
-		SubletFeature.Result result = region.getSubletFeature().rentTo(player);
-		if(result == SubletFeature.Result.SUCCESS) {
+		RentOutFeature.Result result = region.getRentOutFeature().rentTo(player);
+		if(result == RentOutFeature.Result.SUCCESS) {
 			plugin.message(player, result.getMessageKey(), region,
-					Utils.formatCurrency(region.getSubletFeature().getPrice()),
-					region.getSubletFeature().getDuration());
+					Utils.formatCurrency(region.getRentOutFeature().getPrice()),
+					region.getRentOutFeature().getDuration());
 		} else {
 			plugin.message(player, result.getMessageKey(), region);
 		}

@@ -663,13 +663,13 @@ public class FileManager extends Manager {
 	}
 
 	/**
-	 * Take away the spots in regions that players sublet, once their time has run out.
+	 * Take back the shops that players rent out to each other, once the time has run out.
 	 */
-	public void checkSublets() {
+	public void checkRentOuts() {
 		Do.forAll(
-			plugin.getConfig().getInt("sublet.regionsPerTick"),
+			plugin.getConfig().getInt("rentOut.regionsPerTick"),
 			getRegions(),
-			region -> region.getSubletFeature().removeExpired()
+			region -> region.getRentOutFeature().removeExpired()
 		);
 	}
 

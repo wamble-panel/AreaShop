@@ -1,6 +1,6 @@
 package me.wiefferink.areashop.gui;
 
-import me.wiefferink.areashop.features.SubletFeature;
+import me.wiefferink.areashop.features.RentOutFeature;
 import me.wiefferink.areashop.messages.Message;
 import me.wiefferink.areashop.regions.GeneralRegion;
 import me.wiefferink.areashop.tools.Utils;
@@ -14,7 +14,7 @@ import java.util.UUID;
 /**
  * The menu where the holder of a region rents it out to another player.
  */
-public class SubletGui extends Gui {
+public class RentOutGui extends Gui {
 
 	private final GeneralRegion region;
 	private final Gui parent;
@@ -25,7 +25,7 @@ public class SubletGui extends Gui {
 	 * @param region The region to rent out
 	 * @param parent The menu to go back to, may be null
 	 */
-	public SubletGui(Player player, GeneralRegion region, Gui parent) {
+	public RentOutGui(Player player, GeneralRegion region, Gui parent) {
 		super(player);
 		this.region = region;
 		this.parent = parent;
@@ -33,7 +33,7 @@ public class SubletGui extends Gui {
 
 	@Override
 	protected Component title() {
-		return Message.fromKey("panel-subletTitle").replacements(region).toComponent();
+		return Message.fromKey("panel-rentOutTitle").replacements(region).toComponent();
 	}
 
 	@Override
@@ -49,69 +49,69 @@ public class SubletGui extends Gui {
 			return;
 		}
 
-		SubletFeature sublet = region.getSubletFeature();
-		buildTenant(sublet);
-		buildOffer(sublet);
+		RentOutFeature rentOut = region.getRentOutFeature();
+		buildRenter(rentOut);
+		buildOffer(rentOut);
 		buildBack();
 	}
 
 	/**
 	 * Show who has the region at the moment, with the button to take it back.
-	 * @param sublet The renting out of the region
+	 * @param rentOut The renting out of the region
 	 */
-	private void buildTenant(SubletFeature sublet) {
-		UUID tenant = sublet.getTenant();
+	private void buildRenter(RentOutFeature rentOut) {
+		UUID renter = rentOut.getRenter();
 
-		if(tenant == null || !sublet.isRentedOut()) {
+		if(renter == null || !rentOut.isRentedOut()) {
 			set(11, Icon.of(Material.BARRIER)
-					.name("panel-subletNobodyName")
-					.lore("panel-subletNobodyLore")
+					.name("panel-rentOutNobodyName")
+					.lore("panel-rentOutNobodyLore")
 					.build());
 			return;
 		}
 
-		set(11, Icon.head(Bukkit.getOfflinePlayer(tenant))
-				.name("panel-tenantName", SubletFeature.nameOf(tenant))
-				.lore("panel-tenantTimeLeft", Utils.millisToHumanFormat(sublet.getTimeLeft()))
+		set(11, Icon.head(Bukkit.getOfflinePlayer(renter))
+				.name("panel-renterName", RentOutFeature.nameOf(renter))
+				.lore("panel-renterTimeLeft", Utils.millisToHumanFormat(rentOut.getTimeLeft()))
 				.blank()
-				.lore("panel-tenantRemove")
+				.lore("panel-renterRemove")
 				.build(), click -> {
-					sublet.endRental();
-					plugin.message(player, "sublet-removed", SubletFeature.nameOf(tenant), region);
+					rentOut.endRental();
+					plugin.message(player, "rentout-removed", RentOutFeature.nameOf(renter), region);
 					refresh();
 				});
 	}
 
 	/**
 	 * Show whether the region is on offer, with the buttons to change that.
-	 * @param sublet The renting out of the region
+	 * @param rentOut The renting out of the region
 	 */
-	private void buildOffer(SubletFeature sublet) {
-		if(sublet.isOffered()) {
+	private void buildOffer(RentOutFeature rentOut) {
+		if(rentOut.isOffered()) {
 			set(15, Icon.of(Material.LIME_DYE)
-					.name("panel-subletOnName")
-					.lore("panel-subletOnLore", Utils.formatCurrency(sublet.getPrice()), sublet.getDuration())
+					.name("panel-rentOutOnName")
+					.lore("panel-rentOutOnLore", Utils.formatCurrency(rentOut.getPrice()), rentOut.getDuration())
 					.build(), click -> {
-						sublet.stopOffering();
-						plugin.message(player, "sublet-stopped", region);
+						rentOut.stopOffering();
+						plugin.message(player, "rentout-stopped", region);
 						refresh();
 					});
 		} else {
 			set(15, Icon.of(Material.GRAY_DYE)
-					.name("panel-subletOffName")
-					.lore("panel-subletOffLore")
+					.name("panel-rentOutOffName")
+					.lore("panel-rentOutOffLore")
 					.build(), click -> {
 						player.closeInventory();
-						plugin.message(player, "sublet-setPrompt", region);
+						plugin.message(player, "rentout-setPrompt", region);
 					});
 		}
 
 		set(16, Icon.of(Material.NAME_TAG)
-				.name("panel-subletChangeName")
-				.lore("panel-subletChangeLore")
+				.name("panel-rentOutChangeName")
+				.lore("panel-rentOutChangeLore")
 				.build(), click -> {
 					player.closeInventory();
-					plugin.message(player, "sublet-setPrompt", region);
+					plugin.message(player, "rentout-setPrompt", region);
 				});
 	}
 
